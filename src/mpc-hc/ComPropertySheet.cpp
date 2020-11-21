@@ -253,14 +253,16 @@ BOOL CComPropertySheet::OnInitDialog()
     return bResult;
 }
 
-void CComPropertySheet::fulfillThemeReqs() {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+void CComPropertySheet::fulfillThemeReqs()
+{
+    if (AppIsThemeLoaded()) {
         CMPCThemeUtil::fulfillThemeReqs((CWnd*)this);
     }
 }
 
-HBRUSH CComPropertySheet::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+HBRUSH CComPropertySheet::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+    if (AppIsThemeLoaded()) {
         LRESULT lResult;
         if (pWnd->SendChildNotifyLastMsg(&lResult)) {
             return (HBRUSH)lResult;

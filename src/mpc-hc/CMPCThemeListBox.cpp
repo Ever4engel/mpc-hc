@@ -6,8 +6,9 @@
 
 IMPLEMENT_DYNAMIC(CMPCThemeListBox, CListBox)
 
-CMPCThemeListBox::CMPCThemeListBox() {
-    themedToolTipCid = (UINT_PTR)-1;
+CMPCThemeListBox::CMPCThemeListBox()
+{
+    themedToolTipCid = (UINT_PTR) - 1;
     themedSBHelper = nullptr;
     if (!CMPCThemeUtil::canUseWin10DarkTheme()) {
         themedSBHelper = DEBUG_NEW CMPCThemeScrollBarHelper(this);
@@ -15,7 +16,8 @@ CMPCThemeListBox::CMPCThemeListBox() {
 }
 
 
-CMPCThemeListBox::~CMPCThemeListBox() {
+CMPCThemeListBox::~CMPCThemeListBox()
+{
     if (nullptr != themedSBHelper) {
         delete themedSBHelper;
     }
@@ -26,15 +28,18 @@ BEGIN_MESSAGE_MAP(CMPCThemeListBox, CListBox)
     ON_WM_MOUSEWHEEL()
     ON_WM_TIMER()
     ON_WM_VSCROLL()
-    ON_CONTROL_REFLECT(LBN_SELCHANGE, &CMPCThemeListBox::OnLbnSelchange)
+    ON_CONTROL_REFLECT_EX(LBN_SELCHANGE, &CMPCThemeListBox::OnLbnSelchange)
     ON_WM_MOUSEMOVE()
     ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
-void CMPCThemeListBox::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
+void CMPCThemeListBox::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
     CDC dc;
-    if (lpDrawItemStruct->itemID == -1) return;
+    if (lpDrawItemStruct->itemID == -1) {
+        return;
+    }
     dc.Attach(lpDrawItemStruct->hDC);
 
     COLORREF crOldTextColor = dc.GetTextColor();
@@ -67,9 +72,9 @@ void CMPCThemeListBox::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 }
 
 
-void CMPCThemeListBox::OnNcPaint() {
-    const CAppSettings& s = AfxGetAppSettings();
-    if (s.bMPCThemeLoaded) {
+void CMPCThemeListBox::OnNcPaint()
+{
+    if (AppIsThemeLoaded()) {
         if (nullptr != themedSBHelper) {
             themedSBHelper->themedNcPaintWithSB();
         } else {
@@ -80,16 +85,18 @@ void CMPCThemeListBox::OnNcPaint() {
     }
 }
 
-BOOL CMPCThemeListBox::PreTranslateMessage(MSG* pMsg) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+BOOL CMPCThemeListBox::PreTranslateMessage(MSG* pMsg)
+{
+    if (AppIsThemeLoaded()) {
         themedToolTip.RelayEvent(pMsg);
     }
     return CListBox::PreTranslateMessage(pMsg);
 }
 
-void CMPCThemeListBox::PreSubclassWindow() {
+void CMPCThemeListBox::PreSubclassWindow()
+{
     CListBox::PreSubclassWindow();
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         if (CMPCThemeUtil::canUseWin10DarkTheme()) {
             SetWindowTheme(GetSafeHwnd(), L"DarkMode_Explorer", NULL);
         } else {
@@ -103,7 +110,8 @@ void CMPCThemeListBox::PreSubclassWindow() {
 }
 
 
-BOOL CMPCThemeListBox::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
+BOOL CMPCThemeListBox::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
     CListBox::OnMouseWheel(nFlags, zDelta, pt);
     if (nullptr != themedSBHelper) {
         themedSBHelper->updateScrollInfo();
@@ -113,22 +121,26 @@ BOOL CMPCThemeListBox::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
     return TRUE;
 }
 
-void CMPCThemeListBox::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+void CMPCThemeListBox::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
     CListBox::OnVScroll(nSBCode, nPos, pScrollBar);
     if (nullptr != themedSBHelper) {
         themedSBHelper->updateScrollInfo();
     }
 }
 
-void CMPCThemeListBox::OnLbnSelchange() {
+BOOL CMPCThemeListBox::OnLbnSelchange()
+{
     if (nullptr != themedSBHelper) {
         themedSBHelper->updateScrollInfo();
     }
+    return FALSE; //allow non-reflection handling
 }
 
 
-void CMPCThemeListBox::updateToolTip(CPoint point) {
-    if (AfxGetAppSettings().bMPCThemeLoaded && nullptr != themedToolTip) {
+void CMPCThemeListBox::updateToolTip(CPoint point)
+{
+    if (AppIsThemeLoaded() && nullptr != themedToolTip) {
         TOOLINFO ti = { 0 };
         UINT_PTR tid = OnToolHitTest(point, &ti);
         //OnToolHitTest returns -1 on failure but doesn't update uId to match
@@ -138,10 +150,10 @@ void CMPCThemeListBox::updateToolTip(CPoint point) {
                 themedToolTip.DelTool(this);
                 themedToolTip.Activate(FALSE);
             }
-            themedToolTipCid = (UINT_PTR)-1;
+            themedToolTipCid = (UINT_PTR) - 1;
         }
 
-        if (tid != -1 && themedToolTipCid != ti.uId && 0 != ti.uId) { 
+        if (tid != -1 && themedToolTipCid != ti.uId && 0 != ti.uId) {
 
             themedToolTipCid = ti.uId;
 
@@ -155,13 +167,15 @@ void CMPCThemeListBox::updateToolTip(CPoint point) {
 }
 
 
-void CMPCThemeListBox::OnMouseMove(UINT nFlags, CPoint point) {
+void CMPCThemeListBox::OnMouseMove(UINT nFlags, CPoint point)
+{
     updateToolTip(point);
 }
 
-void CMPCThemeListBox::setIntegralHeight() {
+void CMPCThemeListBox::setIntegralHeight()
+{
     CWindowDC dc(this);
-    CFont *font=GetFont();
+    CFont* font = GetFont();
     CFont* pOldFont = dc.SelectObject(font);
     CRect r(0, 0, 99, 99);
     CString test = _T("W");
@@ -171,6 +185,22 @@ void CMPCThemeListBox::setIntegralHeight() {
     dc.SelectObject(pOldFont);
 }
 
-void CMPCThemeListBox::OnSize(UINT nType, int cx, int cy) {
+void CMPCThemeListBox::OnSize(UINT nType, int cx, int cy)
+{
     CListBox::OnSize(nType, cx, cy);
+}
+
+void CMPCThemeListBox::EnsureVisible(int index) {
+    CRect r;
+    GetClientRect(&r);
+    int lbHeight = r.Height();
+
+    int height=0;
+    for (int i = index; i >= 0; i--) {
+        height += GetItemHeight(i);
+        if (height > lbHeight) {
+            SetTopIndex(i + 1);
+            return;
+        }
+    }
 }

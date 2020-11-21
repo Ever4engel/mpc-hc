@@ -1,7 +1,8 @@
 #pragma once
 #include "mplayerc.h"
 
-class CMPCTheme {
+class CMPCTheme
+{
 public:
     static const COLORREF MenuBGColor;
     static const COLORREF WindowBGColor;  //used in explorer for left nav
@@ -13,6 +14,7 @@ public:
 
     static const COLORREF MenuSelectedColor;
     static const COLORREF MenuItemDisabledColor;
+    static const COLORREF MainMenuBorderColor;
     static const COLORREF MenuSeparatorColor;
 
     static const COLORREF ShadowColor;
@@ -32,7 +34,6 @@ public:
 
     static const COLORREF ScrollBGColor;
     static const COLORREF ScrollProgressColor;
-    static const COLORREF ScrollChapterColor;
     static const COLORREF ScrollThumbColor;
     static const COLORREF ScrollThumbHoverColor;
     static const COLORREF ScrollThumbDragColor;
@@ -89,6 +90,7 @@ public:
 
     static const COLORREF ListCtrlDisabledBGColor;
     static const COLORREF ListCtrlGridColor;
+    static const COLORREF ListCtrlErrorColor;
     static const COLORREF HeaderCtrlGridColor;
     static const COLORREF AudioSwitcherGridColor;
 
@@ -126,6 +128,9 @@ public:
     static const COLORREF ActivePlayListItemHLColor;
     static const COLORREF StaticLinkColor;
     static const COLORREF SeekbarCurrentPositionColor;
+    static const COLORREF SeekbarChapterColor;
+    static const COLORREF SeekbarABColor;
+
 
     static const BYTE GripperBitsH[10];
     static const BYTE GripperBitsV[8];

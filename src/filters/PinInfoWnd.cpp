@@ -113,7 +113,7 @@ bool CPinInfoWnd::OnActivate()
                          _T("EDIT"),
                          _T(""),
                          dwStyle |
-                        /* WS_BORDER | */ // equivalent to WS_EX_CLIENTEDGE 
+                         /* WS_BORDER | */ // equivalent to WS_EX_CLIENTEDGE
                          WS_VSCROLL |
                          WS_HSCROLL |
                          ES_MULTILINE |
@@ -154,7 +154,7 @@ bool CPinInfoWnd::OnApply()
 BOOL CPinInfoWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
     //we don't need this anymore, as we bypass the CInternalPropertyPageWnd which is what sets it dirty
-    //SetDirty(false); 
+    //SetDirty(false);
     //we call CWnd implementation because CInternalPropertyPageWnd will set it right back to dirty on a scroll/command message
     return CWnd::OnWndMsg(message, wParam, lParam, pResult);
 }
@@ -175,6 +175,7 @@ void CPinInfoWnd::AddLine(CString str)
 
 void CPinInfoWnd::OnSelectedPinChange()
 {
+    m_info_edit.SetRedraw(FALSE);
     m_info_edit.SetWindowText(_T(""));
 
     int i = m_pin_combo.GetCurSel();
@@ -258,10 +259,13 @@ void CPinInfoWnd::OnSelectedPinChange()
     EndEnumMediaTypes(pmt);
 
     m_info_edit.SetSel(0, 0);
+    m_info_edit.SetRedraw(TRUE);
+    m_info_edit.RedrawWindow(NULL);
 }
 
 
-HBRUSH CPinInfoWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
+HBRUSH CPinInfoWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
     HBRUSH ret;
     ret = getCtlColor(pDC, pWnd, nCtlColor);
     if (nullptr != ret) {
@@ -271,7 +275,8 @@ HBRUSH CPinInfoWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
     }
 }
 
-BOOL CPinInfoWnd::OnEraseBkgnd(CDC* pDC) {
+BOOL CPinInfoWnd::OnEraseBkgnd(CDC* pDC)
+{
     bool ret = MPCThemeEraseBkgnd(pDC, this, CTLCOLOR_DLG);
     if (ret) {
         return ret;

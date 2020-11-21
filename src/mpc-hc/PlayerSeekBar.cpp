@@ -47,6 +47,7 @@ CPlayerSeekBar::CPlayerSeekBar(CMainFrame* pMainFrame)
     , m_bHoverThumb(false)
     , m_tooltipState(TOOLTIP_HIDDEN)
     , m_bIgnoreLastTooltipPoint(true)
+    , m_lastDragSeekTickCount(0)
 {
     ZeroMemory(&m_ti, sizeof(m_ti));
     m_ti.cbSize = sizeof(m_ti);
@@ -67,9 +68,10 @@ BOOL CPlayerSeekBar::Create(CWnd* pParentWnd)
         return FALSE;
     }
 
-    if (!AfxGetAppSettings().bMPCThemeLoaded) {
-        CMPCThemeUtil::getFontByType(mpcThemeFont, GetWindowDC(), CMPCThemeUtil::MessageFont);
-        SetFont(&mpcThemeFont);
+    if (!AppIsThemeLoaded()) {
+        if (CMPCThemeUtil::getFontByType(mpcThemeFont, GetWindowDC(), GetParent(), CMPCThemeUtil::MessageFont)) {
+            SetFont(&mpcThemeFont);
+        }
     }
 
     // Should never be RTLed
@@ -120,7 +122,7 @@ CSize CPlayerSeekBar::CalcFixedLayout(BOOL bStretch, BOOL bHorz)
 {
     CSize ret = __super::CalcFixedLayout(bStretch, bHorz);
     const CAppSettings& s = AfxGetAppSettings();
-    if (s.bMPCThemeLoaded && s.bModernSeekbar) {
+    if (s.bMPCTheme && s.bModernSeekbar) {
         ret.cy = m_pMainFrame->m_dpi.ScaleY(5 + s.iModernSeekbarHeight); //expand the toolbar if using "fill" mode
     } else {
         ret.cy = m_pMainFrame->m_dpi.ScaleY(20);
@@ -149,9 +151,17 @@ void CPlayerSeekBar::SyncVideoToThumb()
     GetParent()->PostMessage(WM_HSCROLL, NULL, reinterpret_cast<LPARAM>(m_hWnd));
 }
 
-void CPlayerSeekBar::CheckScrollDistance(CPoint point, REFERENCE_TIME minimum_time_change)
+void CPlayerSeekBar::CheckScrollDistance(CPoint point, REFERENCE_TIME minimum_duration_change)
 {
-    if (m_rtPos != m_rtHoverPos && abs(m_rtHoverPos - m_rtPos) >= minimum_time_change) {
+    ULONGLONG tickcount = GetTickCount64();
+    ULONGLONG ticks_since_last_seek = tickcount - m_lastDragSeekTickCount;
+    REFERENCE_TIME posdiff = m_rtHoverPos > m_rtPos ? m_rtHoverPos - m_rtPos : m_rtPos - m_rtHoverPos;
+
+    // While dragging m_rtPos doesn't get updated. So in that case seek after 5 seconds if mouse isn't moving.
+    // If mouse pointer has moved, seek after 200ms and if at least minimum duration change.
+    // Or after 1000ms if 1/5th of minimum duration change
+    if (ticks_since_last_seek >= 5000ULL || posdiff > 0 && (minimum_duration_change == 0 || ticks_since_last_seek >= 200ULL && posdiff >= minimum_duration_change || ticks_since_last_seek >= 1000ULL && posdiff >= minimum_duration_change/5)) {
+        m_lastDragSeekTickCount = tickcount;
         m_rtHoverPos = m_rtPos;
         m_hoverPoint = point;
         SyncVideoToThumb();
@@ -222,8 +232,7 @@ void CPlayerSeekBar::CreateThumb(bool bEnabled, CDC& parentDC)
         VERIFY(bmp.CreateCompatibleBitmap(&parentDC, r.Width(), r.Height()));
         VERIFY(pThumb->SelectObject(bmp));
 
-        const CAppSettings& s = AfxGetAppSettings();
-        if (s.bMPCThemeLoaded) {
+        if (AppIsThemeLoaded()) {
             //just a rectangle, we will draw from scratch
         } else {
             pThumb->Draw3dRect(&r, light, 0);
@@ -263,9 +272,9 @@ CRect CPlayerSeekBar::GetChannelRect() const
     if (m_pMainFrame->m_controls.ControlChecked(CMainFrameControls::Toolbar::CONTROLS)) {
         r.bottom += ADD_TO_BOTTOM_WITHOUT_CONTROLBAR;
     }
-    const CAppSettings& s = AfxGetAppSettings();
 
-    if (s.bMPCThemeLoaded && s.bModernSeekbar) { //no thumb so we can use all the space
+    const CAppSettings& s = AfxGetAppSettings();
+    if (s.bMPCTheme && s.bModernSeekbar) { //no thumb so we can use all the space
         r.DeflateRect(m_pMainFrame->m_dpi.ScaleFloorX(2), m_pMainFrame->m_dpi.ScaleFloorX(2));
     } else {
         CSize sz(m_pMainFrame->m_dpi.ScaleFloorX(8), m_pMainFrame->m_dpi.ScaleFloorY(7) + 1);
@@ -514,8 +523,20 @@ void CPlayerSeekBar::OnPaint()
     light  = GetSysColor(COLOR_3DHILIGHT),
     bkg    = GetSysColor(COLOR_BTNFACE);
 
+    const CRect channelRect(GetChannelRect());
+    auto funcMarkChannel = [&](REFERENCE_TIME pos, long verticalPadding, COLORREF markColor) {
+        long markPos = channelRect.left + ChannelPointFromPosition(pos);
+        CRect r(markPos, channelRect.top + verticalPadding, markPos + 1, channelRect.bottom - verticalPadding);
+        if (r.right < channelRect.right) {
+            r.right++;
+        }
+        ASSERT(r.right <= channelRect.right);
+        dc.FillSolidRect(&r, markColor);
+        dc.ExcludeClipRect(&r);
+    };
+
     const CAppSettings& s = AfxGetAppSettings();
-    if (s.bMPCThemeLoaded) {
+    if (s.bMPCTheme) {
         // Thumb
         if (!s.bModernSeekbar) { //no thumb while showing seek progress
             CRect r(GetThumbRect());
@@ -542,8 +563,6 @@ void CPlayerSeekBar::OnPaint()
             m_lastThumbRect = r;
         }
 
-        const CRect channelRect(GetChannelRect());
-
         // Chapters
         if (m_bHasDuration) {
             CAutoLock lock(&m_csChapterBag);
@@ -551,17 +570,20 @@ void CPlayerSeekBar::OnPaint()
                 for (DWORD i = 0; i < m_pChapterBag->ChapGetCount(); i++) {
                     REFERENCE_TIME rtChap;
                     if (SUCCEEDED(m_pChapterBag->ChapGet(i, &rtChap, nullptr))) {
-                        long chanPos = channelRect.left + ChannelPointFromPosition(rtChap);
-                        CRect r(chanPos, channelRect.top+1, chanPos + 1, channelRect.bottom-1);
-                        if (r.right < channelRect.right) {
-                            r.right++;
-                        }
-                        ASSERT(r.right <= channelRect.right);
-                        dc.FillSolidRect(&r, CMPCTheme::ScrollChapterColor);
-                        dc.ExcludeClipRect(&r);
+                        funcMarkChannel(rtChap, 1, CMPCTheme::SeekbarChapterColor);
                     } else {
                         ASSERT(FALSE);
                     }
+                }
+            }
+            REFERENCE_TIME aPos, bPos;
+            bool aEnabled, bEnabled;
+            if (m_pMainFrame->CheckABRepeat(aPos, bPos, aEnabled, bEnabled)) {
+                if (aEnabled) {
+                    funcMarkChannel(aPos, 1, CMPCTheme::SeekbarABColor);
+                }
+                if (bEnabled) {
+                    funcMarkChannel(bPos, 1, CMPCTheme::SeekbarABColor);
                 }
             }
         }
@@ -619,8 +641,6 @@ void CPlayerSeekBar::OnPaint()
             m_lastThumbRect = r;
         }
 
-        const CRect channelRect(GetChannelRect());
-
         // Chapters
         if (m_bHasDuration) {
             CAutoLock lock(&m_csChapterBag);
@@ -628,18 +648,22 @@ void CPlayerSeekBar::OnPaint()
                 for (DWORD i = 0; i < m_pChapterBag->ChapGetCount(); i++) {
                     REFERENCE_TIME rtChap;
                     if (SUCCEEDED(m_pChapterBag->ChapGet(i, &rtChap, nullptr))) {
-                        long chanPos = channelRect.left + ChannelPointFromPosition(rtChap);
-                        CRect r(chanPos, channelRect.top, chanPos + 1, channelRect.bottom);
-                        if (r.right < channelRect.right) {
-                            r.right++;
-                        }
-                        ASSERT(r.right <= channelRect.right);
-                        dc.FillSolidRect(&r, dark);
-                        dc.ExcludeClipRect(&r);
+                        funcMarkChannel(rtChap, 0, dark);
                     } else {
                         ASSERT(FALSE);
                     }
                 }
+            }
+        }
+
+        REFERENCE_TIME aPos, bPos;
+        bool aEnabled, bEnabled;
+        if (m_pMainFrame->CheckABRepeat(aPos, bPos, aEnabled, bEnabled)) {
+            if (aEnabled) {
+                funcMarkChannel(aPos, 0, CMPCTheme::SeekbarABColor);
+            }
+            if (bEnabled) {
+                funcMarkChannel(bPos, 0, CMPCTheme::SeekbarABColor);
             }
         }
 
@@ -671,7 +695,7 @@ void CPlayerSeekBar::OnLButtonDown(UINT nFlags, CPoint point)
         SetCapture();
         m_bDraggingThumb = true;
         MoveThumb(point);
-        SyncVideoToThumb();
+        CheckScrollDistance(point, 0);
         invalidateThumb();
     } else {
         if (!m_pMainFrame->m_fFullScreen) {
@@ -728,7 +752,8 @@ void CPlayerSeekBar::OnXButtonDblClk(UINT nFlags, UINT nButton, CPoint point)
     OnXButtonDown(nFlags, nButton, point);
 }
 
-void CPlayerSeekBar::checkHover(CPoint point) {
+void CPlayerSeekBar::checkHover(CPoint point)
+{
     CRect tRect(GetThumbRect());
     bool oldHover = m_bHoverThumb;
     m_bHoverThumb = false;
@@ -736,10 +761,13 @@ void CPlayerSeekBar::checkHover(CPoint point) {
         m_bHoverThumb = true;
     }
 
-    if (m_bHoverThumb != oldHover) invalidateThumb();
+    if (m_bHoverThumb != oldHover) {
+        invalidateThumb();
+    }
 }
 
-void CPlayerSeekBar::invalidateThumb() {
+void CPlayerSeekBar::invalidateThumb()
+{
     CRect tRect(GetThumbRect());
     InvalidateRect(tRect);
 }

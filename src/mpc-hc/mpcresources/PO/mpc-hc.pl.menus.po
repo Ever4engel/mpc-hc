@@ -2,15 +2,18 @@
 # Copyright (C) 2002 - 2017 see Authors.txt
 # This file is distributed under the same license as the MPC-HC package.
 # Translators:
-# kasper93, 2013-2016
-# Peter Korowacki <piotr.korowacki@gmail.com>, 2016
+# MPC HC <adiposegithub@gmail.com>, 2020
+# Orzełek, 2020
+# Rudolph RD, 2020
+# Michał Trzebiatowski <michtrz@gmail.com>, 2020
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: MPC-HC\n"
-"POT-Creation-Date: 2016-01-17 21:31:34+0000\n"
-"PO-Revision-Date: 2017-08-13 20:50+0000\n"
-"Last-Translator: kasper93\n"
-"Language-Team: Polish (http://www.transifex.com/mpc-hc/mpc-hc/language/pl/)\n"
+"POT-Creation-Date: 2020-08-09 19:14:33+0000\n"
+"PO-Revision-Date: 2020-01-02 07:46+0000\n"
+"Last-Translator: Michał Trzebiatowski <michtrz@gmail.com>, 2020\n"
+"Language-Team: Polish (https://www.transifex.com/mpchc/teams/106126/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -89,6 +92,10 @@ msgctxt "ID_FILE_PROPERTIES"
 msgid "P&roperties"
 msgstr "&Właściwości"
 
+msgctxt "ID_FILE_OPEN_LOCATION"
+msgid "Open File &Location"
+msgstr "Otwórz lokalizację pliku"
+
 msgctxt "ID_FILE_EXIT"
 msgid "E&xit"
 msgstr "Zam&knij program"
@@ -143,7 +150,7 @@ msgstr "Debu&guj Shadery"
 
 msgctxt "ID_VIEW_MPCTHEME"
 msgid "Dark Theme (restart)"
-msgstr ""
+msgstr "Ciemny motyw (uruchom ponownie)"
 
 msgctxt "POPUP"
 msgid "&Presets..."
@@ -168,6 +175,10 @@ msgstr "P&ełny ekran"
 msgctxt "POPUP"
 msgid "&Zoom"
 msgstr "Rozmiar &okna"
+
+msgctxt "ID_VIEW_ZOOM_25"
+msgid "&25%"
+msgstr "&25%"
 
 msgctxt "ID_VIEW_ZOOM_50"
 msgid "&50%"
@@ -493,6 +504,22 @@ msgctxt "ID_PANSCAN_CENTER"
 msgid "Cen&ter"
 msgstr "Wyśrodku&j"
 
+msgctxt "ID_PANSCAN_ROTATEZM"
+msgid "Rotate Cloc&kwise"
+msgstr "Obróć w Prawo"
+
+msgctxt "ID_PANSCAN_ROTATEZ270"
+msgid "Rotate Counter-Clock&wise"
+msgstr "Obróć w Lewo"
+
+msgctxt "ID_PANSCAN_ROTATEXM"
+msgid "&Flip Vertically"
+msgstr "Obróć w pionie"
+
+msgctxt "ID_PANSCAN_ROTATEYM"
+msgid "&Mirror"
+msgstr "Lustrzane Odbicie"
+
 msgctxt "ID_VIEW_RESET"
 msgid "Re&set"
 msgstr "Przywróć &domyślne"
@@ -552,6 +579,82 @@ msgstr "&Plik"
 msgctxt "ID_PLAY_REPEAT_WHOLEPLAYLIST"
 msgid "&Playlist"
 msgstr "&Lista odtwarzania"
+
+msgctxt "ID_PLAY_REPEAT_AB"
+msgid "A-B (&Reset)"
+msgstr "A-B (&zresetuj)"
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_A"
+msgid "A-B (Mark &A)"
+msgstr "A-B (znacznik &A)"
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_B"
+msgid "A-B (Mark &B)"
+msgstr "A-B (znacznik &B)"
+
+msgctxt "POPUP"
+msgid "&Playback Rate"
+msgstr "&Tempo"
+
+msgctxt "POPUP"
+msgid "0.25 x"
+msgstr "0.25 x"
+
+msgctxt "POPUP"
+msgid "0.50 x"
+msgstr "0.50 x"
+
+msgctxt "POPUP"
+msgid "0.75 x"
+msgstr "0.75 x"
+
+msgctxt "POPUP"
+msgid "0.90 x"
+msgstr "0.90 x"
+
+msgctxt "POPUP"
+msgid "1.00 x"
+msgstr "1.00 x"
+
+msgctxt "POPUP"
+msgid "1.10 x"
+msgstr "1.10 x"
+
+msgctxt "POPUP"
+msgid "1.25 x"
+msgstr "1.25 x"
+
+msgctxt "POPUP"
+msgid "1.50 x"
+msgstr "1.50 x"
+
+msgctxt "POPUP"
+msgid "2.00 x"
+msgstr "2.00 x"
+
+msgctxt "POPUP"
+msgid "3.00 x"
+msgstr "3.00 x"
+
+msgctxt "POPUP"
+msgid "4.00 x"
+msgstr "4.00 x"
+
+msgctxt "POPUP"
+msgid "6.00 x"
+msgstr "6.00 x"
+
+msgctxt "POPUP"
+msgid "8.00 x"
+msgstr "8.00 x"
+
+msgctxt "POPUP"
+msgid "24 fps"
+msgstr "24 fps"
+
+msgctxt "POPUP"
+msgid "25 fps"
+msgstr "25 fps"
 
 msgctxt "ID_PLAY_DECRATE"
 msgid "&Decrease Rate"
@@ -712,4 +815,3 @@ msgstr "&Wspomóż"
 msgctxt "ID_HELP_ABOUT"
 msgid "&About..."
 msgstr "&O programie..."
-

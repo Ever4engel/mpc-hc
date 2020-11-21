@@ -121,6 +121,8 @@ protected:
     void InternalOnMouseMove(UINT nFlags, const CPoint& point);
     void InternalOnMouseLeave();
     void InternalOnDestroy();
+public:
+    BOOL OnMouseHWheelImpl(UINT nFlags, short zDelta, const CPoint& point);
 };
 
 class CMouseWnd : public CWnd, public CMouse
@@ -149,6 +151,7 @@ private:
     void OnXButtonDblClk(UINT nFlags, UINT nButton, CPoint point);
 
     BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint point);
+    void OnMouseHWheel(UINT nFlags, short zDelta, CPoint point);
 
     BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 

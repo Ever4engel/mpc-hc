@@ -2,18 +2,17 @@
 # Copyright (C) 2002 - 2017 see Authors.txt
 # This file is distributed under the same license as the MPC-HC package.
 # Translators:
-# Burak <burakgarci@gmail.com>, 2013
-# Devrim, 2013
-# kasper93, 2013
-# Sinan H., 2014-2016
-# Sinan H., 2013
+# MPC HC <adiposegithub@gmail.com>, 2020
+# Ali Kömesöğütlü <byzlo685@gmail.com>, 2020
+# Mücahid Aksel <mucahidaksel@gmail.com>, 2020
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: MPC-HC\n"
-"POT-Creation-Date: 2016-01-17 21:31:34+0000\n"
-"PO-Revision-Date: 2017-08-13 20:49+0000\n"
-"Last-Translator: kasper93\n"
-"Language-Team: Turkish (http://www.transifex.com/mpc-hc/mpc-hc/language/tr/)\n"
+"POT-Creation-Date: 2020-08-09 19:14:33+0000\n"
+"PO-Revision-Date: 2020-01-02 07:46+0000\n"
+"Last-Translator: Mücahid Aksel <mucahidaksel@gmail.com>, 2020\n"
+"Language-Team: Turkish (https://www.transifex.com/mpchc/teams/106126/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -50,7 +49,7 @@ msgstr "CD-RO&M Aç"
 
 msgctxt "ID_RECENT_FILES"
 msgid "Recent &Files"
-msgstr "&Belgeler"
+msgstr "&Geçmiş"
 
 msgctxt "ID_FILE_CLOSE_AND_RESTORE"
 msgid "&Close"
@@ -58,7 +57,7 @@ msgstr "&Kapat"
 
 msgctxt "ID_FILE_SAVE_COPY"
 msgid "&Save a Copy..."
-msgstr "&Kaydet..."
+msgstr "&Kopya Kaydet..."
 
 msgctxt "ID_FILE_SAVE_IMAGE"
 msgid "Save &Image..."
@@ -70,27 +69,31 @@ msgstr "Küçük &Resim Kaydet..."
 
 msgctxt "POPUP"
 msgid "S&ubtitles"
-msgstr "A&lt Yazılar"
+msgstr "A&ltyazılar"
 
 msgctxt "ID_FILE_SUBTITLES_LOAD"
 msgid "&Load Subtitles..."
-msgstr "&Alt Yazı Yükle..."
+msgstr "&Altyazı Aç..."
 
 msgctxt "ID_FILE_SUBTITLES_SAVE"
 msgid "Save S&ubtitles..."
-msgstr "Alt Yazı K&aydet.."
+msgstr "Altyazı K&aydet.."
 
 msgctxt "ID_FILE_SUBTITLES_DOWNLOAD"
 msgid "&Download Subtitles..."
-msgstr "&Alt Yazı İndir..."
+msgstr "&Altyazı İndir..."
 
 msgctxt "ID_FILE_SUBTITLES_UPLOAD"
 msgid "&Upload Subtitles..."
-msgstr "&Alt Yazı Gönder..."
+msgstr "&Altyazı Gönder..."
 
 msgctxt "ID_FILE_PROPERTIES"
 msgid "P&roperties"
 msgstr "Ö&zellikler"
+
+msgctxt "ID_FILE_OPEN_LOCATION"
+msgid "Open File &Location"
+msgstr "Dosya Konumunu &Aç"
 
 msgctxt "ID_FILE_EXIT"
 msgid "E&xit"
@@ -146,7 +149,7 @@ msgstr "&Tonlama Hata Ayıklaması"
 
 msgctxt "ID_VIEW_MPCTHEME"
 msgid "Dark Theme (restart)"
-msgstr ""
+msgstr "Koyu Tema (yeniden başlatma gerekli)"
 
 msgctxt "POPUP"
 msgid "&Presets..."
@@ -171,6 +174,10 @@ msgstr "Ta&m Ekran"
 msgctxt "POPUP"
 msgid "&Zoom"
 msgstr "&Yakınlaştırma"
+
+msgctxt "ID_VIEW_ZOOM_25"
+msgid "&25%"
+msgstr "&%25"
 
 msgctxt "ID_VIEW_ZOOM_50"
 msgid "&50%"
@@ -366,7 +373,7 @@ msgstr "&Sıfırlama için bekle"
 
 msgctxt "POPUP"
 msgid "R&eset"
-msgstr "S&ıfırlama"
+msgstr "S&ıfırla"
 
 msgctxt "ID_VIEW_RESET_DEFAULT"
 msgid "Reset to &default renderer settings"
@@ -496,6 +503,22 @@ msgctxt "ID_PANSCAN_CENTER"
 msgid "Cen&ter"
 msgstr "Ort&ala"
 
+msgctxt "ID_PANSCAN_ROTATEZM"
+msgid "Rotate Cloc&kwise"
+msgstr "Saat &Yönünde Döndür"
+
+msgctxt "ID_PANSCAN_ROTATEZ270"
+msgid "Rotate Counter-Clock&wise"
+msgstr "Saat Yö&nünün Tersine Döndür"
+
+msgctxt "ID_PANSCAN_ROTATEXM"
+msgid "&Flip Vertically"
+msgstr "Dikey dönd&ür"
+
+msgctxt "ID_PANSCAN_ROTATEYM"
+msgid "&Mirror"
+msgstr "A&yna"
+
 msgctxt "ID_VIEW_RESET"
 msgid "Re&set"
 msgstr "Sı&fırla"
@@ -556,6 +579,82 @@ msgctxt "ID_PLAY_REPEAT_WHOLEPLAYLIST"
 msgid "&Playlist"
 msgstr "&Oynatma listesi"
 
+msgctxt "ID_PLAY_REPEAT_AB"
+msgid "A-B (&Reset)"
+msgstr "A-B (&Sıfırla)"
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_A"
+msgid "A-B (Mark &A)"
+msgstr "A-B (&A yı işaretle)"
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_B"
+msgid "A-B (Mark &B)"
+msgstr "A-B (&B yi işaretle)"
+
+msgctxt "POPUP"
+msgid "&Playback Rate"
+msgstr "Oynatma hızı"
+
+msgctxt "POPUP"
+msgid "0.25 x"
+msgstr "x 0.25"
+
+msgctxt "POPUP"
+msgid "0.50 x"
+msgstr "x 0.50"
+
+msgctxt "POPUP"
+msgid "0.75 x"
+msgstr "x 0.75"
+
+msgctxt "POPUP"
+msgid "0.90 x"
+msgstr "x 0.90"
+
+msgctxt "POPUP"
+msgid "1.00 x"
+msgstr "x 1.00"
+
+msgctxt "POPUP"
+msgid "1.10 x"
+msgstr "x 1.10"
+
+msgctxt "POPUP"
+msgid "1.25 x"
+msgstr "x 1.25"
+
+msgctxt "POPUP"
+msgid "1.50 x"
+msgstr "x 1.50"
+
+msgctxt "POPUP"
+msgid "2.00 x"
+msgstr "x 2.00"
+
+msgctxt "POPUP"
+msgid "3.00 x"
+msgstr "x 3.00"
+
+msgctxt "POPUP"
+msgid "4.00 x"
+msgstr "x 4.00"
+
+msgctxt "POPUP"
+msgid "6.00 x"
+msgstr "x 6.00"
+
+msgctxt "POPUP"
+msgid "8.00 x"
+msgstr "x 8.00"
+
+msgctxt "POPUP"
+msgid "24 fps"
+msgstr "24 fps"
+
+msgctxt "POPUP"
+msgid "25 fps"
+msgstr "25 fps"
+
 msgctxt "ID_PLAY_DECRATE"
 msgid "&Decrease Rate"
 msgstr "&Oranı Azalt"
@@ -582,7 +681,7 @@ msgstr "&Ses Parçası"
 
 msgctxt "ID_SUBTITLES"
 msgid "Su&btitle Track"
-msgstr "Al&t Yazı Parçası"
+msgstr "Al&tyazı Parçası"
 
 msgctxt "ID_VIDEO_STREAMS"
 msgid "Vide&o Track"
@@ -670,7 +769,7 @@ msgstr "&Kök Menüsü"
 
 msgctxt "ID_NAVIGATE_SUBPICTUREMENU"
 msgid "&Subtitle Menu"
-msgstr "&Alt Yazı Menüsü"
+msgstr "&Altyazı Menüsü"
 
 msgctxt "ID_NAVIGATE_AUDIOMENU"
 msgid "&Audio Menu"
@@ -715,4 +814,3 @@ msgstr "&Bağış yap"
 msgctxt "ID_HELP_ABOUT"
 msgid "&About..."
 msgstr "&Hakkında..."
-

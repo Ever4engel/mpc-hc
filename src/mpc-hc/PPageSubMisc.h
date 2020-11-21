@@ -60,7 +60,6 @@ protected:
     BOOL m_fDisableInternalSubtitles;
     BOOL m_bAutoDownloadSubtitles;
     CString m_strAutoDownloadSubtitlesExclude;
-    BOOL m_bAutoUploadSubtitles;
     BOOL m_bPreferHearingImpairedSubtitles;
     CString m_strSubtitlesProviders;
     CString m_strSubtitlesLanguageOrder;
@@ -74,7 +73,7 @@ protected:
 
     static int CALLBACK SortCompare(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
-    BOOL PreTranslateMessage(MSG * pMsg);
+    BOOL PreTranslateMessage(MSG* pMsg);
 
     DECLARE_MESSAGE_MAP()
 

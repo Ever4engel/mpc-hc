@@ -102,8 +102,7 @@ void CPixelShaderCache::SavePixelShader(
         if (!res) {
             try {
                 CFile::Remove(cacheFilePath);
-            }
-            catch (...) {}
+            } catch (...) {}
         }
     }
 }
@@ -121,8 +120,7 @@ void CPixelShaderCache::LoadCache()
                 if (!LoadCache(finder.GetFileName(), finder.GetFilePath())) {
                     try {
                         CFile::Remove(finder.GetFilePath());
-                    }
-                    catch (...) {}
+                    } catch (...) {}
                 }
             }
         }
@@ -152,19 +150,25 @@ bool CPixelShaderCache::IsEnabled()
 void CPixelShaderCache::TouchFile(const CString& FileName) const
 {
     CFileStatus status;
-    if (CFile::GetStatus(FileName, status)) {
-        status.m_mtime = CTime::GetCurrentTime();
-        CFile::SetStatus(FileName, status);
+    try {
+        if (CFile::GetStatus(FileName, status)) {
+            status.m_mtime = CTime::GetCurrentTime();
+            CFile::SetStatus(FileName, status);
+        }
     }
+    catch (...) {}
 }
 
 bool CPixelShaderCache::IsFileOutdated(const CString& FileName) const
 {
     CFileStatus status;
-    if (CFile::GetStatus(FileName, status)) {
-        CTimeSpan timespan(m_CachedDaysLimit, 0, 0, 0);
-        return CTime::GetCurrentTime() - status.m_mtime > timespan;
+    try {
+        if (CFile::GetStatus(FileName, status)) {
+            CTimeSpan timespan(m_CachedDaysLimit, 0, 0, 0);
+            return CTime::GetCurrentTime() - status.m_mtime > timespan;
+        }
     }
+    catch (...) {}
 
     return true;
 }
@@ -210,8 +214,7 @@ void CPixelShaderCache::DeleteCache(uint64_t Hash)
     if (GetCacheFilePath(cacheFilePath, Hash)) {
         try {
             CFile::Remove(cacheFilePath);
-        }
-        catch (...) {}
+        } catch (...) {}
     }
 }
 

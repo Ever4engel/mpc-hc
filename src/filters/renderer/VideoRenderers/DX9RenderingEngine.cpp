@@ -20,10 +20,12 @@
 
 #include "stdafx.h"
 #include <algorithm>
+#pragma warning(disable: 5033) // warning C5033: 'register' is no longer a supported storage class
 #include "lcms2/library/include/lcms2.h"
 #include "../../../mpc-hc/resource.h"
 #include "Dither.h"
 #include "DX9RenderingEngine.h"
+#include "../../../mpc-hc/ColorProfileUtil.h"
 
 // UUID for vorpX hack
 static const IID IID_D3D9VorpVideoCaptureTexture = { 0x8a49d79, 0x8646, 0x4867, { 0xb9, 0x34, 0x13, 0x12, 0xe4, 0x4b, 0x23, 0xdb } };
@@ -58,7 +60,7 @@ static void AdjustQuad(MYD3DVERTEX<texcoords>* v, double dx, double dy)
             v[i].t[j].v -= (float)(offset * dy);
         }
 
-        if constexpr (texcoords > 1) {
+        if constexpr(texcoords > 1) {
             v[i].t[texcoords - 1].u -= offset;
             v[i].t[texcoords - 1].v -= offset;
         }
@@ -954,6 +956,28 @@ HRESULT CDX9RenderingEngine::TextureResizeBicubic2pass(IDirect3DTexture9* pTextu
 }
 */
 
+HRESULT CDX9RenderingEngine::Resize(IDirect3DTexture9* pTexture, const CRect& srcRect, const CRect& destRect)
+{
+    HRESULT hr;
+
+    const CRenderersSettings& r = GetRenderersSettings();
+
+    DWORD iDX9Resizer = r.iDX9Resizer;
+    Vector dst[4];
+    Transform(destRect, dst);
+
+    if (iDX9Resizer == 0 || iDX9Resizer == 1) {
+        D3DTEXTUREFILTERTYPE Filter = iDX9Resizer == 0 ? D3DTEXF_POINT : D3DTEXF_LINEAR;
+        hr = TextureResize(pTexture, dst, Filter, srcRect);
+    } else if (iDX9Resizer == 2) {
+        hr = TextureResizeBilinear(pTexture, dst, srcRect);
+    } else if (iDX9Resizer >= 3) {
+        hr = TextureResizeBicubic1pass(pTexture, dst, srcRect);
+    }
+
+	return hr;
+}
+
 HRESULT CDX9RenderingEngine::InitFinalPass()
 {
     HRESULT hr;
@@ -1056,25 +1080,7 @@ HRESULT CDX9RenderingEngine::InitFinalPass()
     // Initialize the color management if necessary
     if (bColorManagement) {
         // Get the ICC profile path
-        TCHAR* iccProfilePath = 0;
-
-        HMONITOR hMonitor = MonitorFromWindow(m_hWnd, MONITOR_DEFAULTTONEAREST);
-        MONITORINFOEX miex;
-        miex.cbSize = sizeof(miex);
-        GetMonitorInfo(hMonitor, &miex);
-        HDC hDC = CreateDC(_T("DISPLAY"), miex.szDevice, nullptr, nullptr);
-
-        if (hDC != nullptr) {
-            DWORD icmProfilePathSize = 0;
-            GetICMProfile(hDC, &icmProfilePathSize, nullptr);
-            iccProfilePath = DEBUG_NEW TCHAR[icmProfilePathSize];
-            if (!GetICMProfile(hDC, &icmProfilePathSize, iccProfilePath)) {
-                delete [] iccProfilePath;
-                iccProfilePath = 0;
-            }
-
-            DeleteDC(hDC);
-        }
+        TCHAR* iccProfilePath = ColorProfileUtil::getIccProfilePath(m_hWnd);
 
         // Create the 3D LUT texture
         m_Lut3DSize = 64; // 64x64x64 LUT is enough for high-quality color management

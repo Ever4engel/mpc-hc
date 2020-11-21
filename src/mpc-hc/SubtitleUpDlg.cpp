@@ -212,13 +212,14 @@ void CSubtitleUpDlg::OnDestroy()
     RemoveAllAnchors();
 
     const CHeaderCtrl& pHC = *m_list.GetHeaderCtrl();
-    CString strColumnWidth;
-
-    for (int i = 0; i < pHC.GetItemCount(); ++i) {
-        int w = m_list.GetColumnWidth(i);
-        strColumnWidth.AppendFormat(L"%d,", w);
+    if (pHC) {
+        CString strColumnWidth;
+        for (int i = 0; i < pHC.GetItemCount(); ++i) {
+            int w = m_list.GetColumnWidth(i);
+            strColumnWidth.AppendFormat(L"%d,", w);
+        }
+        AfxGetApp()->WriteProfileString(IDS_R_DLG_SUBTITLEUP, IDS_RS_DLG_SUBTITLEUP_COLWIDTH, strColumnWidth);
     }
-    AfxGetApp()->WriteProfileString(IDS_R_DLG_SUBTITLEUP, IDS_RS_DLG_SUBTITLEUP_COLWIDTH, strColumnWidth);
 
     __super::OnDestroy();
 }
@@ -306,7 +307,7 @@ void CSubtitleUpDlg::OnRightClick(NMHDR* pNMHDR, LRESULT* pResult)
         m.AppendMenu(MF_SEPARATOR);
         m.AppendMenu(MF_STRING | MF_ENABLED, OPEN_URL, ResStr(IDS_SUBMENU_OPENURL));
         m.AppendMenu(MF_STRING | MF_ENABLED, COPY_URL, ResStr(IDS_SUBMENU_COPYURL));
-        if (s.bMPCThemeLoaded) {
+        if (AppIsThemeLoaded()) {
             m.fulfillThemeReqs();
         }
 

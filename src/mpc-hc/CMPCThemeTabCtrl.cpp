@@ -5,13 +5,16 @@
 #include "CMPCThemeUtil.h"
 
 
-CMPCThemeTabCtrl::CMPCThemeTabCtrl():CTabCtrl() {
+CMPCThemeTabCtrl::CMPCThemeTabCtrl(): CTabCtrl()
+{
 }
 
-CMPCThemeTabCtrl::~CMPCThemeTabCtrl() {
+CMPCThemeTabCtrl::~CMPCThemeTabCtrl()
+{
 }
 
-void CMPCThemeTabCtrl::PreSubclassWindow() {
+void CMPCThemeTabCtrl::PreSubclassWindow()
+{
 }
 
 IMPLEMENT_DYNAMIC(CMPCThemeTabCtrl, CTabCtrl)
@@ -22,8 +25,9 @@ BEGIN_MESSAGE_MAP(CMPCThemeTabCtrl, CTabCtrl)
 END_MESSAGE_MAP()
 
 
-HBRUSH CMPCThemeTabCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+HBRUSH CMPCThemeTabCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+    if (AppIsThemeLoaded()) {
         return getCtlColor(pDC, pWnd, nCtlColor);
     } else {
         HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
@@ -31,7 +35,8 @@ HBRUSH CMPCThemeTabCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
     }
 }
 
-void CMPCThemeTabCtrl::doDrawItem(int nItem, CRect rText, bool isSelected, CDC* pDC) {
+void CMPCThemeTabCtrl::doDrawItem(int nItem, CRect rText, bool isSelected, CDC* pDC)
+{
     if (nItem != -1) {
         TCITEM tcitem = { 0 };
         tcitem.mask = TCIF_TEXT | TCIF_STATE;
@@ -98,15 +103,17 @@ void CMPCThemeTabCtrl::doDrawItem(int nItem, CRect rText, bool isSelected, CDC* 
 
 }
 
-void CMPCThemeTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
+void CMPCThemeTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
     CDC dc;
     dc.Attach(lpDrawItemStruct->hDC);
     doDrawItem(lpDrawItemStruct->itemID, lpDrawItemStruct->rcItem, 0 != (lpDrawItemStruct->itemState & ODS_SELECTED), &dc);
     dc.Detach();
 }
 
-BOOL CMPCThemeTabCtrl::OnEraseBkgnd(CDC* pDC) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+BOOL CMPCThemeTabCtrl::OnEraseBkgnd(CDC* pDC)
+{
+    if (AppIsThemeLoaded()) {
         CRect r;
         GetClientRect(r);
         CMPCThemeUtil::drawParentDialogBGClr(this, pDC, r);
@@ -116,8 +123,9 @@ BOOL CMPCThemeTabCtrl::OnEraseBkgnd(CDC* pDC) {
 
 
 
-void CMPCThemeTabCtrl::OnPaint() {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+void CMPCThemeTabCtrl::OnPaint()
+{
+    if (AppIsThemeLoaded()) {
         CPaintDC dc(this); // device context for painting
         int oldDC = dc.SaveDC();
 
@@ -153,7 +161,9 @@ void CMPCThemeTabCtrl::OnPaint() {
         int nTab = GetItemCount();
         int nSel = GetCurSel();
 
-        if (!nTab) return;
+        if (!nTab) {
+            return;
+        }
 
         while (nTab--) {
             if (nTab != nSel) {

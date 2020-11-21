@@ -9,6 +9,7 @@
 #include "CMPCThemeTabCtrl.h"
 #include "VersionHelpersInternal.h"
 #include "CMPCThemeTitleBarControlButton.h"
+#include "CMPCThemeInternalPropertyPageWnd.h"
 #include "CMPCThemeWin10Api.h"
 #undef SubclassWindow
 
@@ -17,20 +18,21 @@ CBrush CMPCThemeUtil::windowBrush = CBrush();
 CBrush CMPCThemeUtil::controlAreaBrush = CBrush();
 CBrush CMPCThemeUtil::W10DarkThemeFileDialogInjectedBGBrush = CBrush();
 
-CFont CMPCThemeUtil::dialogFont = CFont();
-
-CMPCThemeUtil::CMPCThemeUtil() {
+CMPCThemeUtil::CMPCThemeUtil()
+{
 }
 
-CMPCThemeUtil::~CMPCThemeUtil() {
+CMPCThemeUtil::~CMPCThemeUtil()
+{
     for (u_int i = 0; i < allocatedWindows.size(); i++) {
         delete allocatedWindows[i];
     }
 }
 
 
-void CMPCThemeUtil::fulfillThemeReqs(CWnd* wnd) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+void CMPCThemeUtil::fulfillThemeReqs(CWnd* wnd)
+{
+    if (AppIsThemeLoaded()) {
 
         initHelperObjects(wnd);
 
@@ -67,7 +69,7 @@ void CMPCThemeUtil::fulfillThemeReqs(CWnd* wnd) {
                         CMPCThemeRadioOrCheck* pObject = DEBUG_NEW CMPCThemeRadioOrCheck();
                         makeThemed(pObject, tChild);
                     } else { //what other buttons?
-//                        int a = 1;
+                        //                        int a = 1;
                     }
                 } else if (0 == _tcsicmp(windowClass, WC_SCROLLBAR)) {
                 } else if (0 == _tcsicmp(windowClass, WC_BUTTON) && buttonType == BS_GROUPBOX) {
@@ -114,6 +116,9 @@ void CMPCThemeUtil::fulfillThemeReqs(CWnd* wnd) {
                 } else if (0 == _tcsicmp(windowClass, WC_TABCONTROL)) {
                     CMPCThemeTabCtrl* pObject = DEBUG_NEW CMPCThemeTabCtrl();
                     makeThemed(pObject, tChild);
+                } else if (windowTitle == _T("CInternalPropertyPageWnd")) { //only seems to be needed for windows from external filters?
+                    CMPCThemeInternalPropertyPageWnd* pObject = DEBUG_NEW CMPCThemeInternalPropertyPageWnd();
+                    makeThemed(pObject, tChild);
                 }
             }
             if (0 == _tcsicmp(windowClass, _T("#32770"))) { //dialog class
@@ -125,28 +130,35 @@ void CMPCThemeUtil::fulfillThemeReqs(CWnd* wnd) {
     }
 }
 
-void CMPCThemeUtil::initHelperObjects(CWnd* wnd) {
-    if (contentBrush.m_hObject == nullptr) contentBrush.CreateSolidBrush(CMPCTheme::ContentBGColor);
-    if (windowBrush.m_hObject == nullptr) windowBrush.CreateSolidBrush(CMPCTheme::WindowBGColor);
-    if (controlAreaBrush.m_hObject == nullptr) controlAreaBrush.CreateSolidBrush(CMPCTheme::ControlAreaBGColor);
-    if (W10DarkThemeFileDialogInjectedBGBrush.m_hObject == nullptr) W10DarkThemeFileDialogInjectedBGBrush.CreateSolidBrush(CMPCTheme::W10DarkThemeFileDialogInjectedBGColor);
-    if (dialogFont.m_hObject == nullptr) {
-        CDC* pDC = wnd->GetWindowDC();
-        CMPCThemeUtil::getFontByType(dialogFont, pDC, CMPCThemeUtil::DialogFont);
-        wnd->ReleaseDC(pDC);
+void CMPCThemeUtil::initHelperObjects(CWnd* wnd)
+{
+    if (contentBrush.m_hObject == nullptr) {
+        contentBrush.CreateSolidBrush(CMPCTheme::ContentBGColor);
+    }
+    if (windowBrush.m_hObject == nullptr) {
+        windowBrush.CreateSolidBrush(CMPCTheme::WindowBGColor);
+    }
+    if (controlAreaBrush.m_hObject == nullptr) {
+        controlAreaBrush.CreateSolidBrush(CMPCTheme::ControlAreaBGColor);
+    }
+    if (W10DarkThemeFileDialogInjectedBGBrush.m_hObject == nullptr) {
+        W10DarkThemeFileDialogInjectedBGBrush.CreateSolidBrush(CMPCTheme::W10DarkThemeFileDialogInjectedBGColor);
     }
 }
 
-void CMPCThemeUtil::makeThemed(CWnd* pObject, CWnd* tChild) {
+void CMPCThemeUtil::makeThemed(CWnd* pObject, CWnd* tChild)
+{
     allocatedWindows.push_back(pObject);
     pObject->SubclassWindow(tChild->GetSafeHwnd());
 }
 
-LRESULT CALLBACK wndProcFileDialog(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK wndProcFileDialog(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
     WNDPROC wndProcSink = NULL;
     wndProcSink = (WNDPROC)GetProp(hWnd, _T("WNDPROC_SINK"));
-    if (!wndProcSink)
+    if (!wndProcSink) {
         return 0;
+    }
     if (WM_CTLCOLOREDIT == uMsg) {
         return (LRESULT)CMPCThemeUtil::getCtlColorFileDialog((HDC)wParam, CTLCOLOR_EDIT);
     }
@@ -154,7 +166,8 @@ LRESULT CALLBACK wndProcFileDialog(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 }
 
 
-void CMPCThemeUtil::subClassFileDialog(CWnd* wnd, HWND hWnd, bool findSink) {
+void CMPCThemeUtil::subClassFileDialog(CWnd* wnd, HWND hWnd, bool findSink)
+{
     if (AfxGetAppSettings().bWindows10DarkThemeActive) {
         initHelperObjects(wnd);
         HWND pChild = ::GetWindow(hWnd, GW_CHILD);
@@ -174,6 +187,17 @@ void CMPCThemeUtil::subClassFileDialog(CWnd* wnd, HWND hWnd, bool findSink) {
                     pObject->setFileDialogChild(true);
                     allocatedWindows.push_back(pObject);
                     pObject->SubclassWindow(pChild);
+                } else if (0 == _tcsicmp(childWindowClass, WC_BUTTON)) {
+                    CWnd* c = CWnd::FromHandle(pChild);
+                    DWORD style = c->GetStyle();
+                    DWORD buttonType = (style & BS_TYPEMASK);
+                    if (buttonType == BS_CHECKBOX || buttonType == BS_AUTOCHECKBOX) {
+                        c->UnsubclassWindow();
+                        CMPCThemeRadioOrCheck* pObject = DEBUG_NEW CMPCThemeRadioOrCheck();
+                        pObject->setFileDialogChild(true);
+                        allocatedWindows.push_back(pObject);
+                        pObject->SubclassWindow(pChild);
+                    }
                 } else if (0 == _tcsicmp(childWindowClass, WC_EDIT)) {
                     CWnd* c = CWnd::FromHandle(pChild);
                     c->UnsubclassWindow();
@@ -194,26 +218,32 @@ void CMPCThemeUtil::subClassFileDialog(CWnd* wnd, HWND hWnd, bool findSink) {
 AFX_STATIC DLGITEMTEMPLATE* AFXAPI _AfxFindNextDlgItem(DLGITEMTEMPLATE* pItem, BOOL bDialogEx);
 AFX_STATIC DLGITEMTEMPLATE* AFXAPI _AfxFindFirstDlgItem(const DLGTEMPLATE* pTemplate);
 
-AFX_STATIC inline BOOL IsDialogEx(const DLGTEMPLATE* pTemplate) {
+AFX_STATIC inline BOOL IsDialogEx(const DLGTEMPLATE* pTemplate)
+{
     return ((_DialogSplitHelper::DLGTEMPLATEEX*)pTemplate)->signature == 0xFFFF;
 }
 
-static inline WORD& DlgTemplateItemCount(DLGTEMPLATE* pTemplate) {
-    if (IsDialogEx(pTemplate))
+static inline WORD& DlgTemplateItemCount(DLGTEMPLATE* pTemplate)
+{
+    if (IsDialogEx(pTemplate)) {
         return reinterpret_cast<_DialogSplitHelper::DLGTEMPLATEEX*>(pTemplate)->cDlgItems;
-    else
+    } else {
         return pTemplate->cdit;
+    }
 }
 
-static inline const WORD& DlgTemplateItemCount(const DLGTEMPLATE* pTemplate) {
-    if (IsDialogEx(pTemplate))
+static inline const WORD& DlgTemplateItemCount(const DLGTEMPLATE* pTemplate)
+{
+    if (IsDialogEx(pTemplate)) {
         return reinterpret_cast<const _DialogSplitHelper::DLGTEMPLATEEX*>(pTemplate)->cDlgItems;
-    else
+    } else {
         return pTemplate->cdit;
+    }
 }
 
-bool CMPCThemeUtil::ModifyTemplates(CPropertySheet* sheet, CRuntimeClass* pageClass, DWORD id, DWORD addStyle, DWORD removeStyle) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+bool CMPCThemeUtil::ModifyTemplates(CPropertySheet* sheet, CRuntimeClass* pageClass, DWORD id, DWORD addStyle, DWORD removeStyle)
+{
+    if (AppIsThemeLoaded()) {
         PROPSHEETHEADER m_psh = sheet->m_psh;
         for (int i = 0; i < sheet->GetPageCount(); i++) {
             CPropertyPage* pPage = sheet->GetPage(i);
@@ -227,11 +257,17 @@ bool CMPCThemeUtil::ModifyTemplates(CPropertySheet* sheet, CRuntimeClass* pageCl
                 pTemplate = tpsp->pResource;
             } else {
                 HRSRC hResource = ::FindResource(tpsp->hInstance, tpsp->pszTemplate, RT_DIALOG);
-                if (hResource == NULL) return false;
+                if (hResource == NULL) {
+                    return false;
+                }
                 HGLOBAL hTemplate = LoadResource(tpsp->hInstance, hResource);
-                if (hTemplate == NULL) return false;
+                if (hTemplate == NULL) {
+                    return false;
+                }
                 pTemplate = (LPCDLGTEMPLATE)LockResource(hTemplate);
-                if (pTemplate == NULL) return false;
+                if (pTemplate == NULL) {
+                    return false;
+                }
             }
 
             if (afxOccManager != NULL) {
@@ -270,12 +306,14 @@ bool CMPCThemeUtil::ModifyTemplates(CPropertySheet* sheet, CRuntimeClass* pageCl
     return true;
 }
 
-void CMPCThemeUtil::enableFileDialogHook() {
+void CMPCThemeUtil::enableFileDialogHook()
+{
     CMainFrame* pMainFrame = AfxGetMainFrame();
     pMainFrame->enableFileDialogHook(this);
 }
 
-HBRUSH CMPCThemeUtil::getCtlColorFileDialog(HDC hDC, UINT nCtlColor) {
+HBRUSH CMPCThemeUtil::getCtlColorFileDialog(HDC hDC, UINT nCtlColor)
+{
     if (CTLCOLOR_EDIT == nCtlColor) {
         ::SetTextColor(hDC, CMPCTheme::W10DarkThemeFileDialogInjectedTextColor);
         ::SetBkColor(hDC, CMPCTheme::W10DarkThemeFileDialogInjectedBGColor);
@@ -284,13 +322,18 @@ HBRUSH CMPCThemeUtil::getCtlColorFileDialog(HDC hDC, UINT nCtlColor) {
         ::SetTextColor(hDC, CMPCTheme::W10DarkThemeFileDialogInjectedTextColor);
         ::SetBkColor(hDC, CMPCTheme::W10DarkThemeFileDialogInjectedBGColor);
         return W10DarkThemeFileDialogInjectedBGBrush;
+    } else if (CTLCOLOR_BTN == nCtlColor) {
+        ::SetTextColor(hDC, CMPCTheme::W10DarkThemeFileDialogInjectedTextColor);
+        ::SetBkColor(hDC, CMPCTheme::W10DarkThemeFileDialogInjectedBGColor);
+        return W10DarkThemeFileDialogInjectedBGBrush;
     } else {
         return NULL;
     }
 }
 
-HBRUSH CMPCThemeUtil::getCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+HBRUSH CMPCThemeUtil::getCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+    if (AppIsThemeLoaded()) {
         LRESULT lResult;
         if (pWnd->SendChildNotifyLastMsg(&lResult)) {
             return (HBRUSH)lResult;
@@ -308,8 +351,9 @@ HBRUSH CMPCThemeUtil::getCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
     return nullptr;
 }
 
-bool CMPCThemeUtil::MPCThemeEraseBkgnd(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+bool CMPCThemeUtil::MPCThemeEraseBkgnd(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+    if (AppIsThemeLoaded()) {
         CRect rect;
         pWnd->GetClientRect(rect);
         if (CTLCOLOR_DLG == nCtlColor) { //only supported "class" for now
@@ -323,12 +367,18 @@ bool CMPCThemeUtil::MPCThemeEraseBkgnd(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
     }
 }
 
-void CMPCThemeUtil::getFontByFace(CFont& font, CDC* pDC, wchar_t* fontName, int size, LONG weight) {
+bool CMPCThemeUtil::getFontByFace(CFont& font, CDC* pDC, CWnd* wnd, wchar_t* fontName, int size, LONG weight)
+{
     LOGFONT lf;
     memset(&lf, 0, sizeof(LOGFONT));
 
+    if (!wnd) {
+        wnd = AfxGetMainWnd();
+    }
+
     DpiHelper dpiWindow;
-    dpiWindow.Override(AfxGetMainWnd()->GetSafeHwnd());
+
+    dpiWindow.Override(wnd->GetSafeHwnd());
     lf.lfHeight = -MulDiv(size, dpiWindow.DPIY(), 72);
 
     lf.lfQuality = CLEARTYPE_QUALITY;
@@ -337,12 +387,17 @@ void CMPCThemeUtil::getFontByFace(CFont& font, CDC* pDC, wchar_t* fontName, int 
     lf.lfWeight = weight;
     wcsncpy_s(lf.lfFaceName, fontName, LF_FACESIZE);
 
-    font.CreateFontIndirect(&lf);
+    return font.CreateFontIndirect(&lf);
 }
 
-void CMPCThemeUtil::getFixedFont(CFont& font, CDC* pDC) {
+bool CMPCThemeUtil::getFixedFont(CFont& font, CDC* pDC, CWnd* wnd)
+{
+    if (!wnd) {
+        wnd = AfxGetMainWnd();
+    }
+
     DpiHelper dpiWindow;
-    dpiWindow.Override(AfxGetMainWnd()->GetSafeHwnd());
+    dpiWindow.Override(wnd->GetSafeHwnd());
 
     LOGFONT tlf;
     memset(&tlf, 0, sizeof(LOGFONT));
@@ -350,13 +405,23 @@ void CMPCThemeUtil::getFixedFont(CFont& font, CDC* pDC) {
     tlf.lfQuality = CLEARTYPE_QUALITY;
     tlf.lfWeight = FW_REGULAR;
     wcsncpy_s(tlf.lfFaceName, _T("Consolas"), LF_FACESIZE);
-    font.CreateFontIndirect(&tlf);
+    return font.CreateFontIndirect(&tlf);
 }
 
-void CMPCThemeUtil::getFontByType(CFont& font, CDC* pDC, int type, bool underline, bool bold) {
-    /* adipose: works poorly for dialogs as they cannot be scaled to fit zoomed fonts, only us for menus and status bars*/
+bool CMPCThemeUtil::getFontByType(CFont& font, CDC* pDC, CWnd* wnd, int type, bool underline, bool bold)
+{
+    /* adipose: works poorly for dialogs as they cannot be scaled to fit zoomed fonts, only use for menus and status bars*/
     NONCLIENTMETRICS m;
     GetMetrics(&m);
+
+    if (!wnd) {
+        wnd = AfxGetMainWnd();
+    }
+
+    //metrics will have the right fonts for the main window, but current window may be on another screen
+    DpiHelper dpiWindow, dpiMain;
+    dpiWindow.Override(wnd->GetSafeHwnd());
+    dpiMain.Override(AfxGetMainWnd()->GetSafeHwnd());
 
     LOGFONT* lf;
     if (type == CaptionFont) {
@@ -383,60 +448,57 @@ void CMPCThemeUtil::getFontByType(CFont& font, CDC* pDC, int type, bool underlin
         //wcsncpy_s(tlf.lfFaceName, _T("MS Shell Dlg"), LF_FACESIZE);
         lf = &tlf;
 #endif
-    } else if (type == fixedFont) {
-        DpiHelper dpiWindow;
-        dpiWindow.Override(AfxGetMainWnd()->GetSafeHwnd());
-
-        LOGFONT tlf;
-        memset(&tlf, 0, sizeof(LOGFONT));
-        tlf.lfHeight = -MulDiv(10, dpiWindow.DPIY(), 72);
-        tlf.lfQuality = CLEARTYPE_QUALITY;
-        tlf.lfWeight = FW_REGULAR;
-        wcsncpy_s(tlf.lfFaceName, _T("Consolas"), LF_FACESIZE);
-        lf = &tlf;
     } else {
         lf = &m.lfMessageFont;
     }
-    if (underline || bold) {
+
+    int newHeight = MulDiv(lf->lfHeight, dpiWindow.DPIY(), dpiMain.DPIY());
+    if (underline || bold || newHeight != lf->lfHeight) {
         LOGFONT tlf;
         memset(&tlf, 0, sizeof(LOGFONT));
-        tlf.lfHeight = lf->lfHeight;
+        tlf.lfHeight = newHeight;
         tlf.lfQuality = lf->lfQuality;
         tlf.lfWeight = lf->lfWeight;
         wcsncpy_s(tlf.lfFaceName, lf->lfFaceName, LF_FACESIZE);
         tlf.lfUnderline = underline;
-        if (bold) tlf.lfWeight = FW_BOLD;
-        font.CreateFontIndirect(&tlf);
+        if (bold) {
+            tlf.lfWeight = FW_BOLD;
+        }
+        return font.CreateFontIndirect(&tlf);
     } else {
-        font.CreateFontIndirect(lf);
+        return font.CreateFontIndirect(lf);
     }
 }
 
-CSize CMPCThemeUtil::GetTextSize(CString str, CDC* pDC, CFont* font) {
+CSize CMPCThemeUtil::GetTextSize(CString str, CDC* pDC, CFont* font)
+{
     CFont* pOldFont = pDC->SelectObject(font);
 
-    CRect r = { 0,0,0,0 };
+    CRect r = { 0, 0, 0, 0 };
     pDC->DrawText(str, r, DT_SINGLELINE | DT_CALCRECT);
     CSize cs = r.Size();
     pDC->SelectObject(pOldFont);
     return cs;
 }
 
-CSize CMPCThemeUtil::GetTextSize(CString str, HDC hDC, CFont *font) {
+CSize CMPCThemeUtil::GetTextSize(CString str, HDC hDC, CFont* font)
+{
     CDC* pDC = CDC::FromHandle(hDC);
     return GetTextSize(str, pDC, font);
 }
 
-CSize CMPCThemeUtil::GetTextSize(CString str, HDC hDC, int type) {
+CSize CMPCThemeUtil::GetTextSize(CString str, HDC hDC, CWnd *wnd, int type)
+{
     CDC* pDC = CDC::FromHandle(hDC);
     CFont font;
-    getFontByType(font, pDC, type);
+    getFontByType(font, pDC, wnd, type);
 
     return GetTextSize(str, pDC, &font);
 }
 
-CSize CMPCThemeUtil::GetTextSizeDiff(CString str, HDC hDC, int type, CFont* curFont) {
-    CSize cs = GetTextSize(str, hDC, type);
+CSize CMPCThemeUtil::GetTextSizeDiff(CString str, HDC hDC, CWnd* wnd, int type, CFont* curFont)
+{
+    CSize cs = GetTextSize(str, hDC, wnd, type);
     CDC* cDC = CDC::FromHandle(hDC);
     CFont* pOldFont = cDC->SelectObject(curFont);
     CSize curCs = cDC->GetTextExtent(str);
@@ -445,7 +507,8 @@ CSize CMPCThemeUtil::GetTextSizeDiff(CString str, HDC hDC, int type, CFont* curF
     return cs - curCs;
 }
 
-void CMPCThemeUtil::GetMetrics(NONCLIENTMETRICS *m) {
+void CMPCThemeUtil::GetMetrics(NONCLIENTMETRICS* m)
+{
     m->cbSize = sizeof(NONCLIENTMETRICS);
     ::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), m, 0);
     DpiHelper dpi, dpiWindow;
@@ -461,7 +524,8 @@ void CMPCThemeUtil::GetMetrics(NONCLIENTMETRICS *m) {
     }
 }
 
-void CMPCThemeUtil::initMemDC(CDC* pDC, CDC& dcMem, CBitmap& bmMem, CRect rect) {
+void CMPCThemeUtil::initMemDC(CDC* pDC, CDC& dcMem, CBitmap& bmMem, CRect rect)
+{
     dcMem.CreateCompatibleDC(pDC);
     dcMem.SetBkColor(pDC->GetBkColor());
     dcMem.SetTextColor(pDC->GetTextColor());
@@ -473,12 +537,14 @@ void CMPCThemeUtil::initMemDC(CDC* pDC, CDC& dcMem, CBitmap& bmMem, CRect rect) 
     dcMem.BitBlt(0, 0, rect.Width(), rect.Height(), pDC, rect.left, rect.top, SRCCOPY);
 }
 
-void CMPCThemeUtil::flushMemDC(CDC* pDC, CDC& dcMem, CRect rect) {
+void CMPCThemeUtil::flushMemDC(CDC* pDC, CDC& dcMem, CRect rect)
+{
     pDC->BitBlt(rect.left, rect.top, rect.Width(), rect.Height(), &dcMem, 0, 0, SRCCOPY);
 }
 
 
-void CMPCThemeUtil::DrawBufferedText(CDC* pDC, CString text, CRect rect, UINT format) {
+void CMPCThemeUtil::DrawBufferedText(CDC* pDC, CString text, CRect rect, UINT format)
+{
     CDC dcMem;
     dcMem.CreateCompatibleDC(pDC);
     dcMem.SetBkColor(pDC->GetBkColor());
@@ -498,7 +564,8 @@ void CMPCThemeUtil::DrawBufferedText(CDC* pDC, CString text, CRect rect, UINT fo
     pDC->BitBlt(rect.left, rect.top, rect.Width(), rect.Height(), &dcMem, 0, 0, SRCCOPY);
 }
 
-void CMPCThemeUtil::Draw2BitTransparent(CDC& dc, int left, int top, int width, int height, CBitmap& bmp, COLORREF fgColor) {
+void CMPCThemeUtil::Draw2BitTransparent(CDC& dc, int left, int top, int width, int height, CBitmap& bmp, COLORREF fgColor)
+{
     COLORREF crOldTextColor = dc.GetTextColor();
     COLORREF crOldBkColor = dc.GetBkColor();
 
@@ -515,7 +582,9 @@ void CMPCThemeUtil::Draw2BitTransparent(CDC& dc, int left, int top, int width, i
     dc.SetBkColor(crOldBkColor);
 }
 
-void CMPCThemeUtil::dbg(CString text, ...) {
+#if 0
+void CMPCThemeUtil::dbg(CString text, ...)
+{
     va_list args;
     va_start(args, text);
     CString output;
@@ -524,85 +593,137 @@ void CMPCThemeUtil::dbg(CString text, ...) {
     OutputDebugString(_T("\n"));
     va_end(args);
 }
+#endif
 
-float CMPCThemeUtil::getConstantFByDPI(CWnd* window, const float* constants) {
+float CMPCThemeUtil::getConstantFByDPI(CWnd* window, const float* constants)
+{
     int index;
     DpiHelper dpiWindow;
     dpiWindow.Override(window->GetSafeHwnd());
     int dpi = dpiWindow.DPIX();
 
-    if (dpi < 120) index = 0;
-    else if (dpi < 144) index = 1;
-    else if (dpi < 168) index = 2;
-    else if (dpi < 192) index = 3;
-    else index = 4;
+    if (dpi < 120) {
+        index = 0;
+    } else if (dpi < 144) {
+        index = 1;
+    } else if (dpi < 168) {
+        index = 2;
+    } else if (dpi < 192) {
+        index = 3;
+    } else {
+        index = 4;
+    }
 
     return constants[index];
 }
 
-int CMPCThemeUtil::getConstantByDPI(CWnd* window, const int* constants) {
+int CMPCThemeUtil::getConstantByDPI(CWnd* window, const int* constants)
+{
     int index;
     DpiHelper dpiWindow;
     dpiWindow.Override(window->GetSafeHwnd());
     int dpi = dpiWindow.DPIX();
 
-    if (dpi < 120) index = 0;
-    else if (dpi < 144) index = 1;
-    else if (dpi < 168) index = 2;
-    else if (dpi < 192) index = 3;
-    else index = 4;
+    if (dpi < 120) {
+        index = 0;
+    } else if (dpi < 144) {
+        index = 1;
+    } else if (dpi < 168) {
+        index = 2;
+    } else if (dpi < 192) {
+        index = 3;
+    } else {
+        index = 4;
+    }
 
     return constants[index];
 }
 
-UINT CMPCThemeUtil::getResourceByDPI(CDC* pDC, const UINT* resources) {
+UINT CMPCThemeUtil::getResourceByDPI(CWnd* window, CDC* pDC, const UINT* resources)
+{
     int index;
-    int dpi = pDC->GetDeviceCaps(LOGPIXELSX);
-    if (dpi < 120) index = 0;
-    else if (dpi < 144) index = 1;
-    else if (dpi < 168) index = 2;
-    else if (dpi < 192) index = 3;
-    else index = 4;
+    //int dpi = pDC->GetDeviceCaps(LOGPIXELSX);
+    DpiHelper dpiWindow;
+    dpiWindow.Override(window->GetSafeHwnd());
+    int dpi = dpiWindow.DPIX();
+
+    if (dpi < 120) {
+        index = 0;
+    } else if (dpi < 144) {
+        index = 1;
+    } else if (dpi < 168) {
+        index = 2;
+    } else if (dpi < 192) {
+        index = 3;
+    } else {
+        index = 4;
+    }
 
     return resources[index];
 }
 
-const std::vector<CMPCTheme::pathPoint> CMPCThemeUtil::getIconPathByDPI(CMPCThemeTitleBarControlButton *button) {
+const std::vector<CMPCTheme::pathPoint> CMPCThemeUtil::getIconPathByDPI(CMPCThemeTitleBarControlButton* button)
+{
     DpiHelper dpiWindow;
     dpiWindow.Override(button->GetSafeHwnd());
 
     int dpi = dpiWindow.DPIX();
     switch (button->getButtonType()) {
-    case SC_MINIMIZE:
-        if (dpi < 120) return CMPCTheme::minimizeIcon96;
-        else if (dpi < 144) return CMPCTheme::minimizeIcon120;
-        else if (dpi < 168) return CMPCTheme::minimizeIcon144;
-        else if (dpi < 192) return CMPCTheme::minimizeIcon168;
-        else return CMPCTheme::minimizeIcon192;
-    case SC_RESTORE:
-        if (dpi < 120) return CMPCTheme::restoreIcon96;
-        else if (dpi < 144) return CMPCTheme::restoreIcon120;
-        else if (dpi < 168) return CMPCTheme::restoreIcon144;
-        else if (dpi < 192) return CMPCTheme::restoreIcon168;
-        else return CMPCTheme::restoreIcon192;
-    case SC_MAXIMIZE:
-        if (dpi < 120) return CMPCTheme::maximizeIcon96;
-        else if (dpi < 144) return CMPCTheme::maximizeIcon120;
-        else if (dpi < 168) return CMPCTheme::maximizeIcon144;
-        else if (dpi < 192) return CMPCTheme::maximizeIcon168;
-        else return CMPCTheme::maximizeIcon192;
-    case SC_CLOSE:
-    default:
-        if (dpi < 120) return CMPCTheme::closeIcon96;
-        else if (dpi < 144) return CMPCTheme::closeIcon120;
-        else if (dpi < 168) return CMPCTheme::closeIcon144;
-        else if (dpi < 192) return CMPCTheme::closeIcon168;
-        else return CMPCTheme::closeIcon192;
+        case SC_MINIMIZE:
+            if (dpi < 120) {
+                return CMPCTheme::minimizeIcon96;
+            } else if (dpi < 144) {
+                return CMPCTheme::minimizeIcon120;
+            } else if (dpi < 168) {
+                return CMPCTheme::minimizeIcon144;
+            } else if (dpi < 192) {
+                return CMPCTheme::minimizeIcon168;
+            } else {
+                return CMPCTheme::minimizeIcon192;
+            }
+        case SC_RESTORE:
+            if (dpi < 120) {
+                return CMPCTheme::restoreIcon96;
+            } else if (dpi < 144) {
+                return CMPCTheme::restoreIcon120;
+            } else if (dpi < 168) {
+                return CMPCTheme::restoreIcon144;
+            } else if (dpi < 192) {
+                return CMPCTheme::restoreIcon168;
+            } else {
+                return CMPCTheme::restoreIcon192;
+            }
+        case SC_MAXIMIZE:
+            if (dpi < 120) {
+                return CMPCTheme::maximizeIcon96;
+            } else if (dpi < 144) {
+                return CMPCTheme::maximizeIcon120;
+            } else if (dpi < 168) {
+                return CMPCTheme::maximizeIcon144;
+            } else if (dpi < 192) {
+                return CMPCTheme::maximizeIcon168;
+            } else {
+                return CMPCTheme::maximizeIcon192;
+            }
+        case SC_CLOSE:
+        default:
+            if (dpi < 120) {
+                return CMPCTheme::closeIcon96;
+            } else if (dpi < 144) {
+                return CMPCTheme::closeIcon120;
+            } else if (dpi < 168) {
+                return CMPCTheme::closeIcon144;
+            } else if (dpi < 192) {
+                return CMPCTheme::closeIcon168;
+            } else {
+                return CMPCTheme::closeIcon192;
+            }
     }
 }
 
 
-void CMPCThemeUtil::drawCheckBox(UINT checkState, bool isHover, bool useSystemSize, CRect rectCheck, CDC* pDC, bool isRadio) {
+void CMPCThemeUtil::drawCheckBox(CWnd* window, UINT checkState, bool isHover, bool useSystemSize, CRect rectCheck, CDC* pDC, bool isRadio)
+{
     COLORREF borderClr, bgClr;
     COLORREF oldBkClr = pDC->GetBkColor(), oldTextClr = pDC->GetTextColor();
     if (isHover) {
@@ -615,7 +736,7 @@ void CMPCThemeUtil::drawCheckBox(UINT checkState, bool isHover, bool useSystemSi
 
     if (useSystemSize) {
         CPngImage image;
-        image.Load(getResourceByDPI(pDC, isRadio ? CMPCTheme::ThemeRadios : CMPCTheme::ThemeCheckBoxes), AfxGetInstanceHandle());
+        image.Load(getResourceByDPI(window, pDC, isRadio ? CMPCTheme::ThemeRadios : CMPCTheme::ThemeCheckBoxes), AfxGetInstanceHandle());
         BITMAP bm;
         image.GetBitmap(&bm);
         int size = bm.bmHeight;
@@ -626,11 +747,17 @@ void CMPCThemeUtil::drawCheckBox(UINT checkState, bool isHover, bool useSystemSi
         int index;
         if (isRadio) {
             index = RadioRegular;
-            if (checkState) index += 1;
-            if (isHover) index += 2;
+            if (checkState) {
+                index += 1;
+            }
+            if (isHover) {
+                index += 2;
+            }
         } else {
             index = CheckBoxRegular;
-            if (isHover) index += 1;
+            if (isHover) {
+                index += 1;
+            }
         }
         CRect drawRect(0, 0, size, size);
         //drawRect.OffsetRect(rectCheck.left + (rectCheck.Width() - size) / 2, rectCheck.top + (rectCheck.Height() - size) / 2);
@@ -679,9 +806,10 @@ void CMPCThemeUtil::drawCheckBox(UINT checkState, bool isHover, bool useSystemSi
     pDC->SetTextColor(oldTextClr);
 }
 
-bool CMPCThemeUtil::canUseWin10DarkTheme() {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
-//        return false; //FIXME.  return false to test behavior for OS < Win10 1809
+bool CMPCThemeUtil::canUseWin10DarkTheme()
+{
+    if (AppIsThemeLoaded()) {
+        //        return false; //FIXME.  return false to test behavior for OS < Win10 1809
         RTL_OSVERSIONINFOW osvi = GetRealOSVersion();
         bool ret = (osvi.dwMajorVersion = 10 && osvi.dwMajorVersion >= 0 && osvi.dwBuildNumber >= 17763); //dark theme first available in win 10 1809
         return ret;
@@ -689,7 +817,8 @@ bool CMPCThemeUtil::canUseWin10DarkTheme() {
     return false;
 }
 
-UINT CMPCThemeUtil::defaultLogo() {
+UINT CMPCThemeUtil::defaultLogo()
+{
     return IDF_LOGO4;
 }
 
@@ -699,7 +828,8 @@ struct AFX_CTLCOLOR {
     UINT nCtlType;
 };
 
-void CMPCThemeUtil::drawParentDialogBGClr(CWnd* wnd, CDC* pDC, CRect r, bool fill) {
+void CMPCThemeUtil::drawParentDialogBGClr(CWnd* wnd, CDC* pDC, CRect r, bool fill)
+{
     CBrush brush;
     WPARAM w = (WPARAM)pDC;
     AFX_CTLCOLOR ctl;
@@ -720,8 +850,9 @@ void CMPCThemeUtil::drawParentDialogBGClr(CWnd* wnd, CDC* pDC, CRect r, bool fil
     brush.Detach();
 }
 
-void CMPCThemeUtil::fulfillThemeReqs(CProgressCtrl* ctl) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+void CMPCThemeUtil::fulfillThemeReqs(CProgressCtrl* ctl)
+{
+    if (AppIsThemeLoaded()) {
         SetWindowTheme(ctl->GetSafeHwnd(), _T(""), _T(""));
         ctl->SetBarColor(CMPCTheme::ProgressBarColor);
         ctl->SetBkColor(CMPCTheme::ProgressBarBGColor);
@@ -729,7 +860,8 @@ void CMPCThemeUtil::fulfillThemeReqs(CProgressCtrl* ctl) {
     ctl->UpdateWindow();
 }
 
-void CMPCThemeUtil::enableWindows10DarkFrame(CWnd* window) {
+void CMPCThemeUtil::enableWindows10DarkFrame(CWnd* window)
+{
     if (canUseWin10DarkTheme()) {
         HMODULE hUser = GetModuleHandleA("user32.dll");
         if (hUser) {

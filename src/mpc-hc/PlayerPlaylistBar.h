@@ -34,6 +34,13 @@ class OpenMediaData;
 
 class CMainFrame;
 
+struct CueTrackMeta {
+    CString title;
+    CString performer;
+    int trackID = 0;
+    REFERENCE_TIME time;
+};
+
 class CPlayerPlaylistBar : public CMPCThemePlayerBar, public CDropClient
 {
     DECLARE_DYNAMIC(CPlayerPlaylistBar)
@@ -50,7 +57,10 @@ private:
     CImageList m_fakeImageList;
     CMPCThemePlayerListCtrl m_list;
 
-    EventClient m_eventc;
+	int m_itemHeight = 0;
+	bool createdWindow;
+
+	EventClient m_eventc;
     void EventCallback(MpcEvent ev);
 
     int m_nTimeColWidth;
@@ -58,14 +68,16 @@ private:
 
     void AddItem(CString fn, CAtlList<CString>* subs);
     void AddItem(CAtlList<CString>& fns, CAtlList<CString>* subs, CString label = _T(""), CString ydl_src = _T(""));
-    void ParsePlayList(CString fn, CAtlList<CString>* subs);
-    void ParsePlayList(CAtlList<CString>& fns, CAtlList<CString>* subs, CString label = _T(""), CString ydl_src = _T(""));
+    void ParsePlayList(CString fn, CAtlList<CString>* subs, int redir_count = 0);
+    void ParsePlayList(CAtlList<CString>& fns, CAtlList<CString>* subs, int redir_count = 0, CString label = _T(""), CString ydl_src = _T(""));
     void ResolveLinkFiles(CAtlList<CString>& fns);
 
     bool ParseBDMVPlayList(CString fn);
 
     bool ParseMPCPlayList(CString fn);
     bool SaveMPCPlayList(CString fn, CTextFile::enc e, bool fRemovePath);
+    bool ParseM3UPlayList(CString fn);
+    bool ParseCUESheet(CString fn);
 
     void SetupList();
     void UpdateList();
@@ -103,6 +115,7 @@ public:
     CPlaylist m_pl;
 
     INT_PTR GetCount() const;
+    int GetValidCount() const;
     int GetSelIdx() const;
     void SetSelIdx(int i);
     bool IsAtEnd();
@@ -158,7 +171,7 @@ public:
     afx_msg BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
     afx_msg void OnTimer(UINT_PTR nIDEvent);
     afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint point);
-    afx_msg void OnLvnBeginlabeleditList(NMHDR * pNMHDR, LRESULT * pResult);
+    afx_msg void OnLvnBeginlabeleditList(NMHDR* pNMHDR, LRESULT* pResult);
     afx_msg void OnLvnEndlabeleditList(NMHDR* pNMHDR, LRESULT* pResult);
     afx_msg void OnXButtonDown(UINT nFlags, UINT nButton, CPoint point);
     afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);

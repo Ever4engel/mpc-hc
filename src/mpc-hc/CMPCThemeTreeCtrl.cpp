@@ -7,9 +7,9 @@
 
 CMPCThemeTreeCtrl::CMPCThemeTreeCtrl():
     themedSBHelper(nullptr),
-    themedToolTipCid((UINT_PTR)-1)
+    themedToolTipCid((UINT_PTR) - 1)
 {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         m_brBkgnd.CreateSolidBrush(CMPCTheme::InlineEditBorderColor);
         if (!CMPCThemeUtil::canUseWin10DarkTheme()) {
             themedSBHelper = DEBUG_NEW CMPCThemeScrollBarHelper(this);
@@ -18,25 +18,27 @@ CMPCThemeTreeCtrl::CMPCThemeTreeCtrl():
 
 }
 
-CMPCThemeTreeCtrl::~CMPCThemeTreeCtrl() {
+CMPCThemeTreeCtrl::~CMPCThemeTreeCtrl()
+{
     if (nullptr != themedSBHelper) {
         delete themedSBHelper;
     }
 }
 
-BOOL CMPCThemeTreeCtrl::PreCreateWindow(CREATESTRUCT& cs) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+BOOL CMPCThemeTreeCtrl::PreCreateWindow(CREATESTRUCT& cs)
+{
+    if (AppIsThemeLoaded()) {
         cs.dwExStyle |= WS_EX_CLIENTEDGE;
     }
     return __super::PreCreateWindow(cs);
 }
 
-void CMPCThemeTreeCtrl::fulfillThemeReqs() {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+void CMPCThemeTreeCtrl::fulfillThemeReqs()
+{
+    if (AppIsThemeLoaded()) {
         if (CMPCThemeUtil::canUseWin10DarkTheme()) {
             SetWindowTheme(GetSafeHwnd(), L"DarkMode_Explorer", NULL);
-        }
-        else {
+        } else {
             SetWindowTheme(GetSafeHwnd(), L"", NULL);
         }
         SetExtendedStyle(TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER); //necessary to prevent significant flicker
@@ -68,8 +70,9 @@ BEGIN_MESSAGE_MAP(CMPCThemeTreeCtrl, CTreeCtrl)
 END_MESSAGE_MAP()
 IMPLEMENT_DYNAMIC(CMPCThemeTreeCtrl, CTreeCtrl)
 
-BOOL CMPCThemeTreeCtrl::PreTranslateMessage(MSG* pMsg) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+BOOL CMPCThemeTreeCtrl::PreTranslateMessage(MSG* pMsg)
+{
+    if (AppIsThemeLoaded()) {
         if (!IsWindow(themedToolTip.m_hWnd)) {
             themedToolTip.Create(this, TTS_ALWAYSTIP);
             themedToolTip.enableFlickerHelper();
@@ -81,8 +84,9 @@ BOOL CMPCThemeTreeCtrl::PreTranslateMessage(MSG* pMsg) {
     return __super::PreTranslateMessage(pMsg);
 }
 
-void CMPCThemeTreeCtrl::updateToolTip(CPoint point) {
-    if (AfxGetAppSettings().bMPCThemeLoaded && nullptr != themedToolTip) {
+void CMPCThemeTreeCtrl::updateToolTip(CPoint point)
+{
+    if (AppIsThemeLoaded() && nullptr != themedToolTip) {
         TOOLINFO ti = { 0 };
         UINT_PTR tid = OnToolHitTest(point, &ti);
         //OnToolHitTest returns -1 on failure but doesn't update uId to match
@@ -92,7 +96,7 @@ void CMPCThemeTreeCtrl::updateToolTip(CPoint point) {
                 themedToolTip.DelTool(this);
                 themedToolTip.Activate(FALSE);
             }
-            themedToolTipCid = (UINT_PTR)-1;
+            themedToolTipCid = (UINT_PTR) - 1;
         }
 
         if (tid != -1 && themedToolTipCid != ti.uId && 0 != ti.uId) {
@@ -108,71 +112,74 @@ void CMPCThemeTreeCtrl::updateToolTip(CPoint point) {
     }
 }
 
-void CMPCThemeTreeCtrl::OnMouseMove(UINT nFlags, CPoint point) {
+void CMPCThemeTreeCtrl::OnMouseMove(UINT nFlags, CPoint point)
+{
     __super::OnMouseMove(nFlags, point);
     updateToolTip(point);
 }
 
-void CMPCThemeTreeCtrl::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult) {
+void CMPCThemeTreeCtrl::OnNMCustomdraw(NMHDR* pNMHDR, LRESULT* pResult)
+{
     LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
     NMTVCUSTOMDRAW* pstCD = reinterpret_cast<NMTVCUSTOMDRAW*>(pNMHDR);
     *pResult = CDRF_DODEFAULT;
 
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
 
         bool isFocus, isHot;
         switch (pNMCD->dwDrawStage) {
-        case CDDS_PREPAINT:
-        {
-            *pResult = CDRF_NOTIFYITEMDRAW;
-            CDC dc;
-            dc.Attach(pNMCD->hdc);
-            dc.FillSolidRect(&pNMCD->rc, CMPCTheme::ContentBGColor);
-            //doEraseBkgnd(&dc);
-            dc.Detach();
-            break;
-        }
-        case CDDS_ITEMPREPAINT:
-            isFocus = 0 != (pNMCD->uItemState & CDIS_FOCUS);
-            isHot = 0 != (pNMCD->uItemState & CDIS_HOT);
+            case CDDS_PREPAINT: {
+                *pResult = CDRF_NOTIFYITEMDRAW;
+                CDC dc;
+                dc.Attach(pNMCD->hdc);
+                dc.FillSolidRect(&pNMCD->rc, CMPCTheme::ContentBGColor);
+                //doEraseBkgnd(&dc);
+                dc.Detach();
+                break;
+            }
+            case CDDS_ITEMPREPAINT:
+                isFocus = 0 != (pNMCD->uItemState & CDIS_FOCUS);
+                isHot = 0 != (pNMCD->uItemState & CDIS_HOT);
 
-            //regular theme is a bit ugly but better than Explorer theme. we clear the focus states to control the highlight ourselves
-            if (!CMPCThemeUtil::canUseWin10DarkTheme()) {
-                pNMCD->uItemState &= ~(CDIS_FOCUS | CDIS_HOT | CDIS_SELECTED);
-            }
+                //regular theme is a bit ugly but better than Explorer theme. we clear the focus states to control the highlight ourselves
+                if (!CMPCThemeUtil::canUseWin10DarkTheme()) {
+                    pNMCD->uItemState &= ~(CDIS_FOCUS | CDIS_HOT | CDIS_SELECTED);
+                }
 
-            if (isFocus) {
-                pstCD->clrTextBk = CMPCTheme::TreeCtrlFocusColor;
-            } else if (isHot) {
-                pstCD->clrTextBk = CMPCTheme::TreeCtrlHoverColor;
-            } else {
-                pstCD->clrTextBk = CMPCTheme::ContentBGColor;
-            }
-            if (0 == (pNMCD->uItemState & CDIS_DISABLED) && IsWindowEnabled()) {
-                pstCD->clrText = CMPCTheme::TextFGColor;
-            } else {
-                pstCD->clrText = CMPCTheme::ButtonDisabledFGColor;
-            }
-            *pResult = CDRF_DODEFAULT;
-            break;
-        default:
-            pResult = CDRF_DODEFAULT;
-            break;
+                if (isFocus) {
+                    pstCD->clrTextBk = CMPCTheme::TreeCtrlFocusColor;
+                } else if (isHot) {
+                    pstCD->clrTextBk = CMPCTheme::TreeCtrlHoverColor;
+                } else {
+                    pstCD->clrTextBk = CMPCTheme::ContentBGColor;
+                }
+                if (0 == (pNMCD->uItemState & CDIS_DISABLED) && IsWindowEnabled()) {
+                    pstCD->clrText = CMPCTheme::TextFGColor;
+                } else {
+                    pstCD->clrText = CMPCTheme::ButtonDisabledFGColor;
+                }
+                *pResult = CDRF_DODEFAULT;
+                break;
+            default:
+                pResult = CDRF_DODEFAULT;
+                break;
         }
     } else {
         __super::OnPaint();
     }
 }
 
-void CMPCThemeTreeCtrl::doEraseBkgnd(CDC* pDC) {
+void CMPCThemeTreeCtrl::doEraseBkgnd(CDC* pDC)
+{
     CRect r;
     GetWindowRect(r);
     r.OffsetRect(-r.left, -r.top);
     pDC->FillSolidRect(r, CMPCTheme::ContentBGColor);
 }
 
-BOOL CMPCThemeTreeCtrl::OnEraseBkgnd(CDC* pDC) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+BOOL CMPCThemeTreeCtrl::OnEraseBkgnd(CDC* pDC)
+{
+    if (AppIsThemeLoaded()) {
         //doEraseBkgnd(pDC); //we do this in the custom draw prepaint step now, to allow double buffering to work
         return TRUE;
     } else {
@@ -181,8 +188,9 @@ BOOL CMPCThemeTreeCtrl::OnEraseBkgnd(CDC* pDC) {
 }
 
 
-void CMPCThemeTreeCtrl::OnNcPaint() {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+void CMPCThemeTreeCtrl::OnNcPaint()
+{
+    if (AppIsThemeLoaded()) {
         if (nullptr != themedSBHelper) {
             themedSBHelper->themedNcPaintWithSB();
         } else {
@@ -194,9 +202,10 @@ void CMPCThemeTreeCtrl::OnNcPaint() {
 }
 
 //no end scroll notification for treectrl, so handle mousewheel, v and h scrolls :-/
-BOOL CMPCThemeTreeCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
+BOOL CMPCThemeTreeCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
     BOOL ret = __super::OnMouseWheel(nFlags, zDelta, pt);
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         if (nullptr != themedSBHelper) {
             themedSBHelper->updateScrollInfo();
         }
@@ -206,22 +215,25 @@ BOOL CMPCThemeTreeCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
     return ret;
 }
 
-void CMPCThemeTreeCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+void CMPCThemeTreeCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
     __super::OnVScroll(nSBCode, nPos, pScrollBar);
     if (nullptr != themedSBHelper) {
         themedSBHelper->updateScrollInfo();
     }
 }
 
-void CMPCThemeTreeCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+void CMPCThemeTreeCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
     __super::OnHScroll(nSBCode, nPos, pScrollBar);
     if (nullptr != themedSBHelper) {
         themedSBHelper->updateScrollInfo();
     }
 }
 
-LRESULT CMPCThemeTreeCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
-    if (AfxGetAppSettings().bMPCThemeLoaded && nullptr != themedSBHelper) {
+LRESULT CMPCThemeTreeCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+{
+    if (AppIsThemeLoaded() && nullptr != themedSBHelper) {
         if (themedSBHelper->WindowProc(this, message, wParam, lParam)) {
             return 1;
         }

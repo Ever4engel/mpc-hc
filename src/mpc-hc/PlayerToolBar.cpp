@@ -61,7 +61,7 @@ bool CPlayerToolBar::LoadExternalToolBar(CImage& image, bool useColor)
     }
     const std::vector<CString> extensions({ _T("png"), _T("bmp") });
     CString basetbname;
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         basetbname = _T("toolbar_dark.");
     } else {
         basetbname = _T("toolbar.");
@@ -100,7 +100,7 @@ void CPlayerToolBar::LoadToolbarImage()
     m_pButtonsImages.reset();
     m_pDisabledButtonsImages.reset();
 
-    bool colorToolbar=false, toolbarImageLoaded=false;
+    bool colorToolbar = false, toolbarImageLoaded = false;
     if (LoadExternalToolBar(image, true)) {
         colorToolbar = true;
         toolbarImageLoaded = true;
@@ -110,8 +110,7 @@ void CPlayerToolBar::LoadToolbarImage()
 
     if (toolbarImageLoaded || (!AfxGetAppSettings().bUseLegacyToolbar && SUCCEEDED(SVGImage::Load(IDF_SVG_TOOLBAR, image, dpiScaling * defaultToolbarScaling)))) {
         origImage = image;
-        const CAppSettings& s = AfxGetAppSettings();
-        if (s.bMPCThemeLoaded) {
+        if (AppIsThemeLoaded() && colorToolbar == false) {
             ImageGrayer::UpdateColor(image, themedImage, false, ImageGrayer::mpcMono);
             image = themedImage;
         }
@@ -130,7 +129,7 @@ void CPlayerToolBar::LoadToolbarImage()
 
                 if (colorToolbar == false) {//if color toolbar, we assume the imagelist can grey itself nicely, rather than using imagegrayer
                     CImage imageDisabled;
-                    if (ImageGrayer::UpdateColor(origImage, imageDisabled, true, s.bMPCThemeLoaded ? ImageGrayer::mpcMono : ImageGrayer::classicGrayscale)) {
+                    if (ImageGrayer::UpdateColor(origImage, imageDisabled, true, AppIsThemeLoaded() ? ImageGrayer::mpcMono : ImageGrayer::classicGrayscale)) {
                         m_pDisabledButtonsImages.reset(DEBUG_NEW CImageList());
                         m_pDisabledButtonsImages->Create(height, height, ILC_COLOR32 | ILC_MASK, 1, 0);
                         m_pDisabledButtonsImages->Add(CBitmap::FromHandle(imageDisabled), nullptr); // alpha is the mask
@@ -197,9 +196,7 @@ BOOL CPlayerToolBar::Create(CWnd* pParentWnd)
 
     LoadToolbarImage();
 
-    const CAppSettings& s = AfxGetAppSettings();
-
-    if (s.bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         themedToolTip.enableFlickerHelper(); //avoid flicker on button hover
         themedToolTip.Create(this, TTS_ALWAYSTIP);
         tb.SetToolTips(&themedToolTip);
@@ -314,7 +311,8 @@ END_MESSAGE_MAP()
 
 // CPlayerToolBar message handlers
 
-void drawButtonBG(NMCUSTOMDRAW nmcd, COLORREF c) {
+void drawButtonBG(NMCUSTOMDRAW nmcd, COLORREF c)
+{
     CDC dc;
     dc.Attach(nmcd.hdc);
     CRect br;
@@ -334,33 +332,31 @@ void CPlayerToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
     LPNMTBCUSTOMDRAW pTBCD = reinterpret_cast<LPNMTBCUSTOMDRAW>(pNMHDR);
     LRESULT lr = CDRF_DODEFAULT;
-    const CAppSettings& s = AfxGetAppSettings();
 
     switch (pTBCD->nmcd.dwDrawStage) {
         case CDDS_PREERASE:
             m_volctrl.Invalidate();
             lr = CDRF_DODEFAULT;
             break;
-        case CDDS_PREPAINT:
-            {
-                // paint the control background, this is needed for XP
-                CDC dc;
-                dc.Attach(pTBCD->nmcd.hdc);
-                RECT r;
-                GetClientRect(&r);
-                if (s.bMPCThemeLoaded) {
-                    dc.FillSolidRect(&r, CMPCTheme::PlayerBGColor);
-                } else {
-                    dc.FillSolidRect(&r, ::GetSysColor(COLOR_BTNFACE));
-                }
-                dc.Detach();
+        case CDDS_PREPAINT: {
+            // paint the control background, this is needed for XP
+            CDC dc;
+            dc.Attach(pTBCD->nmcd.hdc);
+            RECT r;
+            GetClientRect(&r);
+            if (AppIsThemeLoaded()) {
+                dc.FillSolidRect(&r, CMPCTheme::PlayerBGColor);
+            } else {
+                dc.FillSolidRect(&r, ::GetSysColor(COLOR_BTNFACE));
             }
-            lr |= CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;
-            break;
+            dc.Detach();
+        }
+        lr |= CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;
+        break;
         case CDDS_ITEMPREPAINT:
             lr |= CDRF_NOTIFYPOSTPAINT;
             {
-                if (s.bMPCThemeLoaded) {
+                if (AppIsThemeLoaded()) {
                     lr |= TBCDRF_NOBACKGROUND | TBCDRF_NOOFFSET;
                     if (pTBCD->nmcd.uItemState & CDIS_CHECKED) {
                         drawButtonBG(pTBCD->nmcd, CMPCTheme::PlayerButtonCheckedColor);
@@ -376,7 +372,7 @@ void CPlayerToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
             dc.Attach(pTBCD->nmcd.hdc);
             RECT r;
             GetItemRect(11, &r);
-            if (s.bMPCThemeLoaded) {
+            if (AppIsThemeLoaded()) {
                 dc.FillSolidRect(&r, CMPCTheme::PlayerBGColor);
             } else {
                 dc.FillSolidRect(&r, GetSysColor(COLOR_BTNFACE));
@@ -436,8 +432,8 @@ void CPlayerToolBar::OnNcPaint() // when using XP styles the NC area isn't drawn
     cr.OffsetRect(-wr.left, -wr.top);
     wr.OffsetRect(-wr.left, -wr.top);
     dc.ExcludeClipRect(&cr);
-    const CAppSettings& s = AfxGetAppSettings();
-    if (s.bMPCThemeLoaded) {
+
+    if (AppIsThemeLoaded()) {
         dc.FillSolidRect(wr, CMPCTheme::PlayerBGColor);
     } else {
         dc.FillSolidRect(wr, ::GetSysColor(COLOR_BTNFACE));
@@ -533,7 +529,8 @@ BOOL CPlayerToolBar::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
     return TRUE;    // message was handled
 }
 
-void CPlayerToolBar::OnLButtonUp(UINT nFlags, CPoint point) {
+void CPlayerToolBar::OnLButtonUp(UINT nFlags, CPoint point)
+{
     mouseDown = false;
     CToolBar::OnLButtonUp(nFlags, point);
 }

@@ -22,7 +22,7 @@
 #pragma once
 #include "../Subtitles/STS.h"
 #include "../filters/switcher/AudioSwitcher/AudioSwitcher.h"
-#include "../thirdparty/sanear/sanear/src/Interfaces.h"
+#include "../thirdparty/sanear/src/Interfaces.h"
 #include "DVBChannel.h"
 #include "FileAssoc.h"
 #include "FilterEnum.h"
@@ -189,6 +189,18 @@ enum DVB_StopFilterGraph {
     DVB_STOP_FG_ALWAYS
 };
 
+struct ShaderC {
+	CString   label;
+	CString   profile;
+	CString   srcdata;
+	ULONGLONG length = 0;
+	FILETIME  ftwrite = {0,0};
+
+	bool Match(LPCWSTR _label, const bool _bD3D11) const {
+		return (label.CompareNoCase(_label) == 0 && (_bD3D11 == (profile == "ps_4_0")));
+	}
+};
+
 struct DisplayMode {
     bool  bValid = false;
     CSize size;
@@ -252,6 +264,8 @@ struct AutoChangeFullscreenMode {
 struct wmcmd_base : public ACCEL {
     BYTE mouse;
     BYTE mouseFS;
+    BYTE mouseVirt;
+    BYTE mouseFSVirt;
     DWORD dwname;
     UINT appcmd;
 
@@ -274,6 +288,8 @@ struct wmcmd_base : public ACCEL {
         X2DBLCLK,
         WUP,
         WDOWN,
+        WRIGHT,
+        WLEFT,
         LAST
     };
 
@@ -283,13 +299,17 @@ struct wmcmd_base : public ACCEL {
     })
     , mouse(NONE)
     , mouseFS(NONE)
+    , mouseVirt(0)
+    , mouseFSVirt(0)
     , dwname(0)
     , appcmd(0) {}
 
-    constexpr wmcmd_base(WORD _cmd, WORD _key, BYTE _fVirt, DWORD _dwname, UINT _appcmd = 0, BYTE _mouse = NONE, BYTE _mouseFS = NONE)
+    constexpr wmcmd_base(WORD _cmd, WORD _key, BYTE _fVirt, DWORD _dwname, UINT _appcmd = 0, BYTE _mouse = NONE, BYTE _mouseFS = NONE, BYTE _mouseVirt = 0, BYTE _mouseFSVirt = 0)
         : ACCEL{ _fVirt, _key, _cmd }
         , mouse(_mouse)
         , mouseFS(_mouseFS)
+        , mouseVirt(_mouseVirt)
+        , mouseFSVirt(_mouseFSVirt)
         , dwname(_dwname)
         , appcmd(_appcmd) {}
 
@@ -330,7 +350,9 @@ public:
         *static_cast<ACCEL*>(this) = *static_cast<const ACCEL*>(default_cmd);
         appcmd = default_cmd->appcmd;
         mouse = default_cmd->mouse;
+        mouseVirt = default_cmd->mouseVirt;
         mouseFS = default_cmd->mouseFS;
+        mouseFSVirt = default_cmd->mouseFSVirt;
         rmcmd.Empty();
         rmrepcnt = 5;
     }
@@ -340,7 +362,9 @@ public:
         return memcmp(static_cast<const ACCEL*>(this), static_cast<const ACCEL*>(default_cmd), sizeof(ACCEL)) ||
                appcmd != default_cmd->appcmd ||
                mouse != default_cmd->mouse ||
+               mouseVirt != default_cmd->mouseVirt ||
                mouseFS != default_cmd->mouseFS ||
+               mouseFSVirt != default_cmd->mouseFSVirt ||
                !rmcmd.IsEmpty() ||
                rmrepcnt != 5;
     }
@@ -398,7 +422,7 @@ public:
 
 class CAppSettings
 {
-    bool bInitialized;
+    bool bInitialized = false;
 
     class CRecentFileAndURLList : public CRecentFileList
     {
@@ -545,8 +569,6 @@ public:
     // Output
     CRenderersSettings m_RenderersSettings;
     int             iDSVideoRendererType;
-    int             iRMVideoRendererType;
-    int             iQTVideoRendererType;
 
     CStringW        strAudioRendererDisplayName;
     bool            fD3DFullscreen;
@@ -572,7 +594,7 @@ public:
     CString         strAnalogVideo;
     CString         strAnalogAudio;
     int             iAnalogCountry;
-    CString         strBDANetworkProvider;
+    //CString         strBDANetworkProvider;
     CString         strBDATuner;
     CString         strBDAReceiver;
     //CString           strBDAStandard;
@@ -583,7 +605,7 @@ public:
     int             iBDAOffset;
     bool            fBDAIgnoreEncryptedChannels;
     int             nDVBLastChannel;
-    std::vector<CDVBChannel> m_DVBChannels;
+    std::vector<CBDAChannel> m_DVBChannels;
     DVB_RebuildFilterGraph nDVBRebuildFilterGraph;
     DVB_StopFilterGraph nDVBStopFilterGraph;
 
@@ -627,12 +649,14 @@ public:
     CString         strAutoDownloadSubtitlesExclude;
     bool            bAutoUploadSubtitles;
     bool            bPreferHearingImpairedSubtitles;
-    bool            bMPCThemeLoaded;
+    bool            bRenderSubtitlesUsingLibass;
+    CStringA        strOpenTypeLangHint;
     bool            bMPCTheme;
     bool            bWindows10DarkThemeActive;
     bool            bWindows10AccentColorsEnabled;
     bool            bModernSeekbar;
     int             iModernSeekbarHeight;
+    int             iFullscreenDelay;
 
     enum class verticalAlignVideoType {
         ALIGN_MIDDLE,
@@ -696,11 +720,15 @@ public:
     bool            bFavRelativeDrive;
     // Save Image...
     CString         strSnapshotPath, strSnapshotExt;
+    bool			bSnapShotSubtitles;
+    bool			bSnapShotKeepVideoExtension;
     // Save Thumbnails...
     int             iThumbRows, iThumbCols, iThumbWidth;
     // Save Subtitle
     bool            bSubSaveExternalStyleFile;
     // Shaders
+    bool            bToggleShader;
+    bool            bToggleShaderScreenSpace;
     ShaderList      m_ShadersExtraList;
     ShaderSelection m_Shaders;
     // Playlist (contex menu)
@@ -774,6 +802,13 @@ public:
     bool bYDLAudioOnly;
     CString sYDLCommandLine;
 
+    bool bEnableCrashReporter;
+
+    int nStreamPosPollerInterval;
+    bool bShowLangInStatusbar;
+
+    bool bAddLangCodeWhenSaveSubtitles;
+
 private:
     struct FilterKey {
         CString name;
@@ -834,9 +869,12 @@ public:
     void            SetFav(favtype ft, CAtlList<CString>& sl);
     void            AddFav(favtype ft, CString s);
 
-    CDVBChannel*    FindChannelByPref(int nPrefNumber);
+    CBDAChannel*    FindChannelByPref(int nPrefNumber);
 
     bool            GetAllowMultiInst() const;
 
     static bool     IsVSFilterInstalled();
+#if USE_LIBASS
+    SubRendererSettings	GetSubRendererSettings();
+#endif
 };

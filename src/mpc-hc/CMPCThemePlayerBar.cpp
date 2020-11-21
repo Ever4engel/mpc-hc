@@ -3,10 +3,12 @@
 #include "mplayerc.h"
 #include "CMPCTheme.h"
 
-CMPCThemePlayerBar::CMPCThemePlayerBar() {
+CMPCThemePlayerBar::CMPCThemePlayerBar()
+{
 }
 
-CMPCThemePlayerBar::~CMPCThemePlayerBar() {
+CMPCThemePlayerBar::~CMPCThemePlayerBar()
+{
 }
 
 IMPLEMENT_DYNAMIC(CMPCThemePlayerBar, CPlayerBar)
@@ -16,9 +18,9 @@ BEGIN_MESSAGE_MAP(CMPCThemePlayerBar, CPlayerBar)
 END_MESSAGE_MAP()
 
 
-BOOL CMPCThemePlayerBar::OnEraseBkgnd(CDC* pDC) {
-    const CAppSettings& s = AfxGetAppSettings();
-    if (s.bMPCThemeLoaded) {
+BOOL CMPCThemePlayerBar::OnEraseBkgnd(CDC* pDC)
+{
+    if (AppIsThemeLoaded()) {
         CRect rect;
         pDC->GetClipBox(&rect);
         pDC->FillSolidRect(rect.left, rect.top, rect.Width(), rect.Height(), CMPCTheme::WindowBGColor);
@@ -33,10 +35,11 @@ void paintHideButton(CDC* pDC, CSCBButton b) //derived from CSCBButton::Paint
 {
     CRect rc = b.GetRect();
 
-    if (b.bPushed)
+    if (b.bPushed) {
         pDC->FillSolidRect(rc, CMPCTheme::ClosePushColor);
-    else if (b.bRaised)
+    } else if (b.bRaised) {
         pDC->FillSolidRect(rc, CMPCTheme::CloseHoverColor);
+    }
 
     COLORREF clrOldTextColor = pDC->GetTextColor();
     pDC->SetTextColor(CMPCTheme::TextFGColor);
@@ -60,15 +63,16 @@ void paintHideButton(CDC* pDC, CSCBButton b) //derived from CSCBButton::Paint
 }
 
 
-void CMPCThemePlayerBar::NcPaintGripper(CDC* pDC, CRect rcClient) { //derived from CSizingControlBarG base implementation
-    const CAppSettings& s = AfxGetAppSettings();
-    if (!s.bMPCThemeLoaded) {
+void CMPCThemePlayerBar::NcPaintGripper(CDC* pDC, CRect rcClient)   //derived from CSizingControlBarG base implementation
+{
+    if (!AppIsThemeLoaded()) {
         __super::NcPaintGripper(pDC, rcClient);
         return;
     }
 
-    if (!HasGripper())
+    if (!HasGripper()) {
         return;
+    }
 
     CRect gripper = rcClient;
     CRect rcbtn = m_biHide.GetRect();
@@ -107,9 +111,9 @@ void CMPCThemePlayerBar::NcPaintGripper(CDC* pDC, CRect rcClient) { //derived fr
     paintHideButton(pDC, m_biHide);
 }
 
-void CMPCThemePlayerBar::mpc_fillNcBG(CDC* mdc, CRect rcDraw) {
-    const CAppSettings& s = AfxGetAppSettings();
-    if (s.bMPCThemeLoaded) {
+void CMPCThemePlayerBar::mpc_fillNcBG(CDC* mdc, CRect rcDraw)
+{
+    if (AppIsThemeLoaded()) {
         if (IsFloating()) {
             rcDraw.DeflateRect(1, 1);
         }

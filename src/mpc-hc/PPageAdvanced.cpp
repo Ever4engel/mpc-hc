@@ -24,6 +24,8 @@
 #include "MainFrm.h"
 #include "EventDispatcher.h"
 #include <strsafe.h>
+#include "CrashReporter.h"
+#include "ExceptionHandler.h"
 
 CPPageAdvanced::CPPageAdvanced()
     : CMPCThemePPageBase(IDD, IDD)
@@ -46,17 +48,19 @@ BOOL CPPageAdvanced::OnInitDialog()
     __super::OnInitDialog();
 
     if (CFont* pFont = m_list.GetFont()) {
-        LOGFONT logfont;
-        pFont->GetLogFont(&logfont);
-        logfont.lfWeight = FW_BOLD;
-        m_fontBold.CreateFontIndirect(&logfont);
+        if (!m_fontBold.m_hObject) {
+            LOGFONT logfont;
+            pFont->GetLogFont(&logfont);
+            logfont.lfWeight = FW_BOLD;
+            m_fontBold.CreateFontIndirect(&logfont);
+        }
     }
 
     SetRedraw(FALSE);
-    m_list.SetExtendedStyle(m_list.GetExtendedStyle() /* | LVS_EX_FULLROWSELECT */ | LVS_EX_AUTOSIZECOLUMNS /*| LVS_EX_DOUBLEBUFFER */| LVS_EX_INFOTIP);
+    m_list.SetExtendedStyle(m_list.GetExtendedStyle() /* | LVS_EX_FULLROWSELECT */ | LVS_EX_AUTOSIZECOLUMNS /*| LVS_EX_DOUBLEBUFFER */ | LVS_EX_INFOTIP);
     m_list.setAdditionalStyles(LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT);
     m_list.InsertColumn(COL_NAME, ResStr(IDS_PPAGEADVANCED_COL_NAME), LVCFMT_LEFT);
-    m_list.InsertColumn(COL_VALUE, ResStr(IDS_PPAGEADVANCED_COL_VALUE), LVCFMT_RIGHT);
+    m_list.InsertColumn(COL_VALUE, ResStr(IDS_PPAGEADVANCED_COL_VALUE), LVCFMT_LEFT);
 
     if (auto pToolTip = m_list.GetToolTips()) {
         // Set topmost for tooltip window. Workaround bug https://connect.microsoft.com/VisualStudio/feedback/details/272350
@@ -80,8 +84,8 @@ BOOL CPPageAdvanced::OnInitDialog()
 
     InitSettings();
 
-    m_list.SetColumnWidth(0, LVSCW_AUTOSIZE_USEHEADER);
     m_list.SetColumnWidth(1, LVSCW_AUTOSIZE_USEHEADER);
+    m_list.SetColumnWidth(0, LVSCW_AUTOSIZE_USEHEADER);
 
     SetRedraw(TRUE);
     return TRUE;
@@ -140,10 +144,13 @@ void CPPageAdvanced::InitSettings()
 
     addBoolItem(HIDE_WINDOWED, IDS_RS_HIDE_WINDOWED_CONTROLS, false, s.bHideWindowedControls, StrRes(IDS_PPAGEADVANCED_HIDE_WINDOWED));
     addBoolItem(BLOCK_VSFILTER, IDS_RS_BLOCKVSFILTER, true, s.fBlockVSFilter, StrRes(IDS_PPAGEADVANCED_BLOCK_VSFILTER));
-    addIntItem(RECENT_FILES_NB, IDS_RS_RECENT_FILES_NUMBER, 20, s.iRecentFilesNumber, std::make_pair(0, 1000), StrRes(IDS_PPAGEADVANCED_RECENT_FILES_NUMBER));
+    addIntItem(RECENT_FILES_NB, IDS_RS_RECENT_FILES_NUMBER, 40, s.iRecentFilesNumber, std::make_pair(0, 1000), StrRes(IDS_PPAGEADVANCED_RECENT_FILES_NUMBER));
     addIntItem(FILE_POS_LONGER, IDS_RS_FILEPOSLONGER, 0, s.iRememberPosForLongerThan, std::make_pair(0, INT_MAX), StrRes(IDS_PPAGEADVANCED_FILE_POS_LONGER));
     addBoolItem(FILE_POS_AUDIO, IDS_RS_FILEPOSAUDIO, true, s.bRememberPosForAudioFiles, StrRes(IDS_PPAGEADVANCED_FILE_POS_AUDIO));
     addIntItem(COVER_SIZE_LIMIT, IDS_RS_COVER_ART_SIZE_LIMIT, 600, s.nCoverArtSizeLimit, std::make_pair(0, INT_MAX), StrRes(IDS_PPAGEADVANCED_COVER_SIZE_LIMIT));
+ #if !defined(_DEBUG) && USE_DRDUMP_CRASH_REPORTER
+    addBoolItem(CRASHREPORTER, IDS_RS_ENABLE_CRASH_REPORTER, true, s.bEnableCrashReporter, StrRes(IDS_PPAGEADVANCED_CRASHREPORTER));
+#endif
     addBoolItem(LOGGING, IDS_RS_LOGGING, false, s.bEnableLogging, StrRes(IDS_PPAGEADVANCED_LOGGER));
     addIntItem(AUTO_DOWNLOAD_SCORE_MOVIES, IDS_RS_AUTODOWNLOADSCOREMOVIES, 0x16, s.nAutoDownloadScoreMovies,
                std::make_pair(10, 30), StrRes(IDS_PPAGEADVANCED_SCORE));
@@ -152,18 +159,24 @@ void CPPageAdvanced::InitSettings()
     addIntItem(DEFAULT_TOOLBAR_SIZE, IDS_RS_DEFAULTTOOLBARSIZE, 24, s.nDefaultToolbarSize,
                std::make_pair(16, 128), StrRes(IDS_PPAGEADVANCED_DEFAULTTOOLBARSIZE));
     addBoolItem(USE_LEGACY_TOOLBAR, IDS_RS_USE_LEGACY_TOOLBAR, false, s.bUseLegacyToolbar, StrRes(IDS_PPAGEADVANCED_USE_LEGACY_TOOLBAR));
-    addBoolItem(USE_YDL, IDS_RS_USE_YDL, true, s.bUseYDL, _T("Process HTTP(s) URLs with Youtube-DL (if available). There is an internal whitelist/blacklist for URLs that are always/never processed."));
-    addIntItem(YDL_MAX_HEIGHT, IDS_RS_YDL_MAX_HEIGHT, 1440, s.iYDLMaxHeight, std::make_pair(0, INT_MAX), _T("Can be used to limit the video resolution that is chosen by Youtube-DL by the given height. Value 0 means it will choose the highest resolution available."));
-    addIntItem(YDL_VIDEO_FORMAT, IDS_RS_YDL_VIDEO_FORMAT, 0, s.iYDLVideoFormat, std::make_pair(0, 8), _T("Preferred video format for stream that is selected from Youtube-DL results.\n0: Automatic\n1: H.264 30fps\n2: H.264 60fps\n3: VP9 30fps\n4: VP9 60fps\n5: VP9 Profile2 30fps\n6: VP9 Profile2 60fps\n7: AV1 30fps\n8: AV1 60fps"));
-    addBoolItem(YDL_AUDIO_ONLY, IDS_RS_YDL_AUDIO_ONLY, false, s.bYDLAudioOnly, _T("Instructs Youtube-DL to prefer an audio-only stream (if available)"));
-    addCStringItem(YDL_COMMAND_LINE, IDS_RS_YDL_COMMAND_LINE, _T(""), s.sYDLCommandLine, _T("Command line parameters for downloading (\"save a copy\") with youtube-dl.exe\nExamples:\n-f best[height<=1080]\n-f bestvideo+bestaudio\n-o \"C:\\downloads\\%(title)s.%(ext)s\""));
-    addBoolItem(SAVEIMAGE_POSITION, IDS_RS_SAVEIMAGE_POSITION, true, s.bSaveImagePosition, _T("Include video position in filename"));
-    addBoolItem(SAVEIMAGE_CURRENTTIME, IDS_RS_SAVEIMAGE_CURRENTTIME, false, s.bSaveImageCurrentTime, _T("Include current time in filename"));
-    addBoolItem(INACCURATE_FASTSEEK, IDS_RS_ALLOW_INACCURATE_FASTSEEK, true, s.bAllowInaccurateFastseek, _T("When enabled, fast seek (to keyframe) has a maximum inaccuracy of 20 seconds. When disabled, a smaller inaccuracy is allowed when deciding between a fast and a normal seek. For example 30% of jump size."));
-    addBoolItem(LOOP_FOLDER_NEXT_FILE, IDS_RS_LOOP_FOLDER_NEXT_FILE, false, s.bLoopFolderOnPlayNextFile, _T("Loop back to first file in folder after playing the last file."));
-    addBoolItem(MPCTHEME_MODERNSEEKBAR, IDS_RS_MODERNSEEKBAR, true, s.bModernSeekbar, _T("Requires Dark Theme. When enabled, the time seekbar and volume indicator don't show a dragger at current position, but instead are filled from left to right."));
-    addIntItem(MODERNSEEKBAR_HEIGHT, IDS_RS_MODERNSEEKBARHEIGHT, DEF_MODERN_SEEKBAR_HEIGHT, s.iModernSeekbarHeight, std::make_pair(MIN_MODERN_SEEKBAR_HEIGHT, MAX_MODERN_SEEKBAR_HEIGHT), _T("Modern seekbar height (at 96dpi, otherwise scaled)"));
-}   
+    addBoolItem(USE_YDL, IDS_RS_USE_YDL, true, s.bUseYDL, StrRes(IDS_PPAGEADVANCED_USE_YDL));
+    addIntItem(YDL_MAX_HEIGHT, IDS_RS_YDL_MAX_HEIGHT, 1440, s.iYDLMaxHeight, std::make_pair(0, INT_MAX), StrRes(IDS_PPAGEADVANCED_YDL_MAX_HEIGHT));
+    addIntItem(YDL_VIDEO_FORMAT, IDS_RS_YDL_VIDEO_FORMAT, 0, s.iYDLVideoFormat, std::make_pair(0, 8), StrRes(IDS_PPAGEADVANCED_YDL_VIDEO_FORMAT));
+    addBoolItem(YDL_AUDIO_ONLY, IDS_RS_YDL_AUDIO_ONLY, false, s.bYDLAudioOnly, StrRes(IDS_PPAGEADVANCED_YDL_AUDIO_ONLY));
+    addCStringItem(YDL_COMMAND_LINE, IDS_RS_YDL_COMMAND_LINE, _T(""), s.sYDLCommandLine, StrRes(IDS_PPAGEADVANCED_YDL_COMMAND_LINE));
+    addBoolItem(SAVEIMAGE_POSITION, IDS_RS_SAVEIMAGE_POSITION, true, s.bSaveImagePosition, StrRes(IDS_PPAGEADVANCED_SAVEIMAGE_POSITION));
+    addBoolItem(SAVEIMAGE_CURRENTTIME, IDS_RS_SAVEIMAGE_CURRENTTIME, false, s.bSaveImageCurrentTime, StrRes(IDS_PPAGEADVANCED_SAVEIMAGE_CURRENTTIME));
+    addBoolItem(INACCURATE_FASTSEEK, IDS_RS_ALLOW_INACCURATE_FASTSEEK, true, s.bAllowInaccurateFastseek, StrRes(IDS_PPAGEADVANCED_ALLOW_INACCURATE_FASTSEEK));
+    addBoolItem(LOOP_FOLDER_NEXT_FILE, IDS_RS_LOOP_FOLDER_NEXT_FILE, false, s.bLoopFolderOnPlayNextFile, StrRes(IDS_PPAGEADVANCED_LOOP_FOLDER_NEXT_FILE));
+    addBoolItem(MPCTHEME_MODERNSEEKBAR, IDS_RS_MODERNSEEKBAR, true, s.bModernSeekbar, StrRes(IDS_PPAGEADVANCED_MODERNSEEKBAR));
+    addIntItem(MODERNSEEKBAR_HEIGHT, IDS_RS_MODERNSEEKBARHEIGHT, DEF_MODERN_SEEKBAR_HEIGHT, s.iModernSeekbarHeight, std::make_pair(MIN_MODERN_SEEKBAR_HEIGHT, MAX_MODERN_SEEKBAR_HEIGHT), StrRes(IDS_PPAGEADVANCED_MODERNSEEKBARHEIGHT));
+    addIntItem(FULLSCREEN_DELAY, IDS_RS_FULLSCREEN_DELAY, MIN_FULLSCREEN_DELAY, s.iFullscreenDelay, std::make_pair(MIN_FULLSCREEN_DELAY, MAX_FULLSCREEN_DELAY), StrRes(IDS_PPAGEADVANCED_FULLSCREEN_DELAY));
+    addBoolItem(SNAPSHOTSUBTITLES, IDS_RS_SNAPSHOTSUBTITLES, true, s.bSnapShotSubtitles, StrRes(IDS_PPAGEADVANCED_SNAPSHOTSUBTITLES));
+    addBoolItem(SNAPSHOTKEEPVIDEOEXTENSION, IDS_RS_SNAPSHOTKEEPVIDEOEXTENSION, true, s.bSnapShotKeepVideoExtension, StrRes(IDS_PPAGEADVANCED_SNAPSHOTKEEPVIDEOEXTENSION));
+    addIntItem(STREAMPOSPOLLER_INTERVAL, IDS_RS_TIME_REFRESH_INTERVAL, 100, s.nStreamPosPollerInterval, std::make_pair(40, 500), _T("Refresh interval (in milliseconds) of time in status bar"));
+    addBoolItem(LANG_STATUSBAR, IDS_RS_SHOW_LANG_STATUSBAR, false, s.bShowLangInStatusbar, _T("Display current audio and subtitle language in status bar"));
+    addBoolItem(ADD_LANGCODE_WHEN_SAVE_SUBTITLES, IDS_RS_ADD_LANGCODE_WHEN_SAVE_SUBTITLES, true, s.bAddLangCodeWhenSaveSubtitles, _T("When save the subtitles file, the language code (if available) text will be added to suggested file name by default."));
+}
 
 BOOL CPPageAdvanced::OnApply()
 {
@@ -181,9 +194,17 @@ BOOL CPPageAdvanced::OnApply()
     s.filePositions.SetMaxSize(s.iRecentFilesNumber);
     s.dvdPositions.SetMaxSize(s.iRecentFilesNumber);
 
+#if !defined(_DEBUG) && USE_DRDUMP_CRASH_REPORTER
+    if (!s.bEnableCrashReporter && CrashReporter::IsEnabled()) {
+        CrashReporter::Disable();
+        MPCExceptionHandler::Enable();
+    }
+#endif
+
     // There is no main frame when the option dialog is displayed stand-alone
     if (CMainFrame* pMainFrame = AfxGetMainFrame()) {
         pMainFrame->UpdateControlState(CMainFrame::UPDATE_CONTROLS_VISIBILITY);
+        pMainFrame->AdjustStreamPosPoller(true);
     }
 
     if (nOldDefaultToolbarSize != s.nDefaultToolbarSize) {
@@ -274,7 +295,7 @@ void CPPageAdvanced::OnNMDblclk(NMHDR* pNMHDR, LRESULT* pResult)
         if (auto pItemBool = std::dynamic_pointer_cast<SettingsBool>(pItem)) {
             pItemBool->Toggle();
             m_list.setItemTextWithDefaultFlag(pNMItemActivate->iItem, COL_VALUE,
-                               pItemBool->GetValue() ? m_strTrue : m_strFalse, !IsDefault(eSetting));
+                                              pItemBool->GetValue() ? m_strTrue : m_strFalse, !IsDefault(eSetting));
             if (pItemBool->GetValue()) {
                 CheckRadioButton(IDC_RADIO1, IDC_RADIO2, IDC_RADIO1);
             } else {

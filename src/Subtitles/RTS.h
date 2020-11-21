@@ -27,6 +27,7 @@
 #include "Rasterizer.h"
 #include "../SubPic/SubPicProviderImpl.h"
 #include "RenderingCache.h"
+#include "../../include/mpc-hc_config.h"
 
 class Effect;
 struct CTextDims;
@@ -448,6 +449,7 @@ class __declspec(uuid("537DCACA-2812-4a4f-B2C6-1A34C17ADEB0"))
     CAtlMap<int, CSubtitle*> m_subtitleCache;
 
     RenderingCaches m_renderingCaches;
+    CCritSec renderLock;
 
     CScreenLayoutAllocator m_sla;
 
@@ -461,7 +463,6 @@ class __declspec(uuid("537DCACA-2812-4a4f-B2C6-1A34C17ADEB0"))
     int m_ktype, m_kstart, m_kend;
     int m_nPolygon;
     int m_polygonBaselineOffset;
-    STSStyle m_styleOverride; // the app can decide to use this style instead of a built-in one
     bool m_bOverrideStyle;
     bool m_bOverridePlacement;
     CSize m_overridePlacement;
@@ -491,6 +492,9 @@ public:
     void SetOverride(bool bOverride, const STSStyle& styleOverride) {
         m_bOverrideStyle = bOverride;
         m_styleOverride = styleOverride;
+#if USE_LIBASS
+        ResetASS(); //styles may change the way the libass file was loaded, so we reload it here
+#endif
     }
 
     void SetAlignment(bool bOverridePlacement, LONG lHorPos, LONG lVerPos) {

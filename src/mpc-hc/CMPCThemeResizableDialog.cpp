@@ -4,22 +4,33 @@
 #include "mplayerc.h"
 
 
-CMPCThemeResizableDialog::CMPCThemeResizableDialog() {
+CMPCThemeResizableDialog::CMPCThemeResizableDialog()
+{
 }
 
-CMPCThemeResizableDialog::CMPCThemeResizableDialog(UINT nIDTemplate, CWnd* pParent):CResizableDialog(nIDTemplate, pParent){
+CMPCThemeResizableDialog::CMPCThemeResizableDialog(UINT nIDTemplate, CWnd* pParent): CResizableDialog(nIDTemplate, pParent)
+{
 }
 
-CMPCThemeResizableDialog::CMPCThemeResizableDialog(LPCTSTR lpszTemplateName, CWnd* pParent):CResizableDialog(lpszTemplateName, pParent) {
+CMPCThemeResizableDialog::CMPCThemeResizableDialog(LPCTSTR lpszTemplateName, CWnd* pParent): CResizableDialog(lpszTemplateName, pParent)
+{
 }
 
 
-CMPCThemeResizableDialog::~CMPCThemeResizableDialog() {
+CMPCThemeResizableDialog::~CMPCThemeResizableDialog()
+{
 }
 
-void CMPCThemeResizableDialog::fulfillThemeReqs(){
+BOOL CMPCThemeResizableDialog::OnInitDialog() {
+    BOOL ret = CResizableDialog::OnInitDialog();
     CMPCThemeUtil::enableWindows10DarkFrame(this);
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    return ret;
+}
+
+void CMPCThemeResizableDialog::fulfillThemeReqs()
+{
+    CMPCThemeUtil::enableWindows10DarkFrame(this);
+    if (AppIsThemeLoaded()) {
         SetSizeGripBkMode(TRANSPARENT); //fix for gripper in mpc theme
     }
     CMPCThemeUtil::fulfillThemeReqs((CWnd*)this);
@@ -30,8 +41,9 @@ BEGIN_MESSAGE_MAP(CMPCThemeResizableDialog, CResizableDialog)
 END_MESSAGE_MAP()
 
 
-HBRUSH CMPCThemeResizableDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+HBRUSH CMPCThemeResizableDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+    if (AppIsThemeLoaded()) {
         return getCtlColor(pDC, pWnd, nCtlColor);
     } else {
         HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);

@@ -33,6 +33,7 @@
 #endif
 #include "RTS.h"
 #include "../DSUtil/PathUtils.h"
+#include "../DSUtil/ISOLang.h"
 
 //
 
@@ -760,8 +761,13 @@ bool CVobSubFile::ReadSub(CString fn)
 
     int len;
     BYTE buff[2048];
-    while ((len = f.Read(buff, sizeof(buff))) > 0 && *(DWORD*)buff == 0xba010000) {
-        m_sub.Write(buff, len);
+    try {
+        while ((len = f.Read(buff, sizeof(buff))) > 0 && *(DWORD*)buff == 0xba010000) {
+            m_sub.Write(buff, len);
+        }
+    }
+    catch (CFileException*) {
+        return false;
     }
 
     return true;
@@ -1404,6 +1410,16 @@ STDMETHODIMP_(int) CVobSubFile::GetStreamCount()
     return iStreamCount;
 }
 
+DWORD LangIDToLCID(WORD langid)
+{
+    unsigned short id = lang_tbl[find_lang(langid)].id;
+    CHAR tmp[3];
+    tmp[0] = id / 256;
+    tmp[1] = id & 0xFF;
+    tmp[2] = 0;
+    return ISOLang::ISO6391ToLcid(tmp);
+}
+
 STDMETHODIMP CVobSubFile::GetStreamInfo(int iStream, WCHAR** ppName, LCID* pLCID)
 {
     for (const auto& sl : m_langs) {
@@ -1421,7 +1437,7 @@ STDMETHODIMP CVobSubFile::GetStreamInfo(int iStream, WCHAR** ppName, LCID* pLCID
         }
 
         if (pLCID) {
-            *pLCID = 0; // TODO: make lcid out of "sl.id"
+            *pLCID = LangIDToLCID(sl.id);
         }
 
         return S_OK;

@@ -5,21 +5,27 @@
 #include <afxglobals.h>
 
 
-CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrl() {
+CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrl()
+{
     this->useFlickerHelper = false;
     this->helper = nullptr;
+    BOOL notBasicMode;
+    DwmIsCompositionEnabled(&notBasicMode);
+    basicMode = !notBasicMode;
 }
 
 
-CMPCThemeToolTipCtrl::~CMPCThemeToolTipCtrl() {
+CMPCThemeToolTipCtrl::~CMPCThemeToolTipCtrl()
+{
     if (nullptr != helper) {
         helper->DestroyWindow();
         delete helper;
     }
 }
 
-void CMPCThemeToolTipCtrl::enableFlickerHelper() {
-    if (IsAppThemed() && IsThemeActive()) { //in classic mode, the helper gets wiped out by the fade, so we disable it
+void CMPCThemeToolTipCtrl::enableFlickerHelper()
+{
+    if (IsAppThemed() && IsThemeActive() && !basicMode) { //in classic/basic mode, the helper gets wiped out by the fade, so we disable it
         this->useFlickerHelper = true;
     }
 }
@@ -35,8 +41,9 @@ BEGIN_MESSAGE_MAP(CMPCThemeToolTipCtrl, CToolTipCtrl)
     ON_WM_WINDOWPOSCHANGING()
 END_MESSAGE_MAP()
 
-void CMPCThemeToolTipCtrl::drawText(CDC& dc, CMPCThemeToolTipCtrl* tt, CRect& rect, bool calcRect) {
-    CFont *font = tt->GetFont();
+void CMPCThemeToolTipCtrl::drawText(CDC& dc, CMPCThemeToolTipCtrl* tt, CRect& rect, bool calcRect)
+{
+    CFont* font = tt->GetFont();
     CFont* pOldFont = dc.SelectObject(font);
 
     CString text;
@@ -62,7 +69,8 @@ void CMPCThemeToolTipCtrl::drawText(CDC& dc, CMPCThemeToolTipCtrl* tt, CRect& re
     dc.SelectObject(pOldFont);
 }
 
-void CMPCThemeToolTipCtrl::paintTT(CDC& dc, CMPCThemeToolTipCtrl* tt) {
+void CMPCThemeToolTipCtrl::paintTT(CDC& dc, CMPCThemeToolTipCtrl* tt)
+{
     CRect r;
     tt->GetClientRect(r);
 
@@ -76,8 +84,9 @@ void CMPCThemeToolTipCtrl::paintTT(CDC& dc, CMPCThemeToolTipCtrl* tt) {
     dc.SetTextColor(oldClr);
 }
 
-void CMPCThemeToolTipCtrl::OnPaint() {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+void CMPCThemeToolTipCtrl::OnPaint()
+{
+    if (AppIsThemeLoaded()) {
         CPaintDC dc(this);
         if (useFlickerHelper) { //helper will paint
             return;
@@ -89,8 +98,9 @@ void CMPCThemeToolTipCtrl::OnPaint() {
 }
 
 
-BOOL CMPCThemeToolTipCtrl::OnEraseBkgnd(CDC* pDC) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+BOOL CMPCThemeToolTipCtrl::OnEraseBkgnd(CDC* pDC)
+{
+    if (AppIsThemeLoaded()) {
         return TRUE;
     } else {
         return __super::OnEraseBkgnd(pDC);
@@ -98,31 +108,40 @@ BOOL CMPCThemeToolTipCtrl::OnEraseBkgnd(CDC* pDC) {
 }
 
 
-int CMPCThemeToolTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) {
-    if (CToolTipCtrl::OnCreate(lpCreateStruct) == -1)
+int CMPCThemeToolTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+    if (CToolTipCtrl::OnCreate(lpCreateStruct) == -1) {
         return -1;
+    }
 
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         makeHelper();
     }
     return 0;
 }
 
-void CMPCThemeToolTipCtrl::makeHelper() {
-    if (!useFlickerHelper) return;
+void CMPCThemeToolTipCtrl::makeHelper()
+{
+    if (!useFlickerHelper) {
+        return;
+    }
 
     if (nullptr != helper) {
         delete helper;
+        helper = nullptr;
     }
     CRect r;
     GetClientRect(r);
+    if (r.Size() == CSize(0, 0)) {
+        return;
+    }
     ClientToScreen(r);
 
     helper = new CMPCThemeToolTipCtrlHelper(this);
     //do it the long way since no menu for parent
     helper->CreateEx(NULL, AfxRegisterWndClass(0), NULL, WS_POPUP | WS_DISABLED,
-        r.left, r.top, r.right - r.left, r.bottom - r.top,
-        GetParent()->GetSafeHwnd(), NULL, NULL);
+                     r.left, r.top, r.right - r.left, r.bottom - r.top,
+                     GetParent()->GetSafeHwnd(), NULL, NULL);
     helper->Invalidate();
     helper->ShowWindow(SW_SHOWNOACTIVATE);
 }
@@ -135,36 +154,42 @@ BEGIN_MESSAGE_MAP(CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrlHelper, CWnd)
 END_MESSAGE_MAP()
 
 
-CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrlHelper::CMPCThemeToolTipCtrlHelper(CMPCThemeToolTipCtrl * tt) {
+CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrlHelper::CMPCThemeToolTipCtrlHelper(CMPCThemeToolTipCtrl* tt)
+{
     this->tt = tt;
 }
 
-CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrlHelper::~CMPCThemeToolTipCtrlHelper() {
+CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrlHelper::~CMPCThemeToolTipCtrlHelper()
+{
     DestroyWindow();
 }
 
-void CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrlHelper::OnPaint() {
+void CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrlHelper::OnPaint()
+{
     CPaintDC dc(this);
     CMPCThemeToolTipCtrl::paintTT(dc, tt);
 }
 
 
-BOOL CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrlHelper::OnEraseBkgnd(CDC* pDC) {
+BOOL CMPCThemeToolTipCtrl::CMPCThemeToolTipCtrlHelper::OnEraseBkgnd(CDC* pDC)
+{
     return TRUE;
 }
 
-void CMPCThemeToolTipCtrl::OnMove(int x, int y) {
+void CMPCThemeToolTipCtrl::OnMove(int x, int y)
+{
     CToolTipCtrl::OnMove(x, y);
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         makeHelper();
     }
 }
 
 
-void CMPCThemeToolTipCtrl::OnShowWindow(BOOL bShow, UINT nStatus) {
+void CMPCThemeToolTipCtrl::OnShowWindow(BOOL bShow, UINT nStatus)
+{
 
     CToolTipCtrl::OnShowWindow(bShow, nStatus);
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         if (!bShow) {
             if (helper != nullptr) {
                 delete helper;
@@ -174,17 +199,19 @@ void CMPCThemeToolTipCtrl::OnShowWindow(BOOL bShow, UINT nStatus) {
     }
 }
 
-void CMPCThemeToolTipCtrl::OnSize(UINT nType, int cx, int cy) {
+void CMPCThemeToolTipCtrl::OnSize(UINT nType, int cx, int cy)
+{
     CToolTipCtrl::OnSize(nType, cx, cy);
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         makeHelper();
     }
 }
 
 
-void CMPCThemeToolTipCtrl::OnWindowPosChanging(WINDOWPOS* lpwndpos) {
+void CMPCThemeToolTipCtrl::OnWindowPosChanging(WINDOWPOS* lpwndpos)
+{
     CToolTipCtrl::OnWindowPosChanging(lpwndpos);
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         //hack to make it fit if fonts differ from parent. can be manually avoided
         //if the parent widget is set to same font (see CMPCThemePlayerListCtrl using MessageFont now)
         CString text;

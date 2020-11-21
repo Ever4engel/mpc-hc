@@ -86,8 +86,12 @@ void CSubPicAllocatorPresenterImpl::InitMaxSubtitleTextureSize(int maxSize, CSiz
             m_maxSubtitleTextureSize = desktopSize;
             m_SubtitleTextureLimit = DESKTOP;
             // keep size within sane limits
-            if (m_maxSubtitleTextureSize.cx > 7680) m_maxSubtitleTextureSize.cx = 7680;
-            if (m_maxSubtitleTextureSize.cy > 4320) m_maxSubtitleTextureSize.cx = 4320;
+            if (m_maxSubtitleTextureSize.cx > 7680) {
+                m_maxSubtitleTextureSize.cx = 7680;
+            }
+            if (m_maxSubtitleTextureSize.cy > 4320) {
+                m_maxSubtitleTextureSize.cx = 4320;
+            }
             break;
         case 1:
             m_maxSubtitleTextureSize.SetSize(1024, 768);
@@ -121,10 +125,13 @@ void CSubPicAllocatorPresenterImpl::InitMaxSubtitleTextureSize(int maxSize, CSiz
             break;
     }
 
+    if (m_maxSubtitleTextureSize.cx == 0 || m_maxSubtitleTextureSize.cy == 0) {
+        m_maxSubtitleTextureSize.SetSize(1920, 1080);
+    }
     m_curSubtitleTextureSize = m_maxSubtitleTextureSize;
 }
 
-void CSubPicAllocatorPresenterImpl::AlphaBltSubPic(const CRect& windowRect,
+HRESULT CSubPicAllocatorPresenterImpl::AlphaBltSubPic(const CRect& windowRect,
                                                    const CRect& videoRect,
                                                    SubPicDesc* pTarget /*= nullptr*/,
                                                    const double videoStretchFactor /*= 1.0*/,
@@ -135,16 +142,18 @@ void CSubPicAllocatorPresenterImpl::AlphaBltSubPic(const CRect& windowRect,
         CRect rcSource, rcDest;
         if (SUCCEEDED(pSubPic->GetSourceAndDest(windowRect, videoRect, rcSource, rcDest,
                                                 videoStretchFactor, xOffsetInPixels))) {
-            pSubPic->AlphaBlt(rcSource, rcDest, pTarget);
+            return pSubPic->AlphaBlt(rcSource, rcDest, pTarget);
         }
     }
+
+    return E_FAIL;
 }
 
 // ISubPicAllocatorPresenter
 
 STDMETHODIMP_(void) CSubPicAllocatorPresenterImpl::SetVideoSize(CSize szVideo, CSize szAspectRatio /* = CSize(0, 0) */)
 {
-    if (szAspectRatio == CSize(0, 0)) {
+    if (szAspectRatio.cx == 0) {
         szAspectRatio = szVideo;
     }
 
@@ -156,8 +165,11 @@ STDMETHODIMP_(void) CSubPicAllocatorPresenterImpl::SetVideoSize(CSize szVideo, C
 
     if (bVideoSizeChanged || bAspectRatioChanged) {
         if (m_SubtitleTextureLimit == VIDEO) {
-            m_maxSubtitleTextureSize = m_curSubtitleTextureSize = GetVideoSize();
-            m_pAllocator->SetMaxTextureSize(m_maxSubtitleTextureSize);
+            CSize vidsize = GetVideoSize(true);
+            if (vidsize.cx > 0 && vidsize.cy > 0) {
+                m_maxSubtitleTextureSize = m_curSubtitleTextureSize = vidsize;
+                m_pAllocator->SetMaxTextureSize(m_maxSubtitleTextureSize);
+            }
         }
     }
 }
@@ -184,10 +196,14 @@ STDMETHODIMP_(void) CSubPicAllocatorPresenterImpl::SetPosition(RECT w, RECT v)
 
     m_windowRect = w;
 
-    if (m_SubtitleTextureLimit != VIDEO) {
+    if (bWindowSizeChanged && m_pAllocator) {
         if (m_windowRect.Width() != m_curSubtitleTextureSize.cx || m_windowRect.Height() != m_curSubtitleTextureSize.cy) {
             if (m_windowRect.Width() * m_windowRect.Height() <= m_maxSubtitleTextureSize.cx * m_maxSubtitleTextureSize.cy) {
                 m_curSubtitleTextureSize = CSize(m_windowRect.Width(), m_windowRect.Height());
+                m_pAllocator->SetMaxTextureSize(m_curSubtitleTextureSize);
+            } else if (m_curSubtitleTextureSize.cx * m_curSubtitleTextureSize.cy < m_maxSubtitleTextureSize.cx * m_maxSubtitleTextureSize.cy) {
+                // ToDo: use size with same total max pixels, but with AR of window?
+                m_curSubtitleTextureSize = CSize(m_maxSubtitleTextureSize.cx, m_maxSubtitleTextureSize.cy);
                 m_pAllocator->SetMaxTextureSize(m_curSubtitleTextureSize);
             }
         }
@@ -211,8 +227,9 @@ STDMETHODIMP_(void) CSubPicAllocatorPresenterImpl::SetPosition(RECT w, RECT v)
         }
     }
 
-    if (bWindowPosChanged || bVideoRectChanged) {
+	if (bWindowPosChanged || bVideoRectChanged || m_bOtherTransform) {
         Paint(false);
+		m_bOtherTransform = false;
     }
 }
 

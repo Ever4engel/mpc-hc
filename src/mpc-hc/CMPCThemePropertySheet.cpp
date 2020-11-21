@@ -4,14 +4,17 @@
 #include "CMPCThemeUtil.h"
 
 CMPCThemePropertySheet::CMPCThemePropertySheet(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
-    : CPropertySheet(nIDCaption, pParentWnd, iSelectPage) {
+    : CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
+{
 }
 
 CMPCThemePropertySheet::CMPCThemePropertySheet(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
-    : CPropertySheet(pszCaption, pParentWnd, iSelectPage) {
+    : CPropertySheet(pszCaption, pParentWnd, iSelectPage)
+{
 }
 
-CMPCThemePropertySheet::~CMPCThemePropertySheet() {
+CMPCThemePropertySheet::~CMPCThemePropertySheet()
+{
 }
 
 IMPLEMENT_DYNAMIC(CMPCThemePropertySheet, CPropertySheet)
@@ -19,20 +22,23 @@ BEGIN_MESSAGE_MAP(CMPCThemePropertySheet, CPropertySheet)
     ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
-BOOL CMPCThemePropertySheet::OnInitDialog() {
+BOOL CMPCThemePropertySheet::OnInitDialog()
+{
     BOOL bResult = __super::OnInitDialog();
     fulfillThemeReqs();
     return bResult;
 }
 
-void CMPCThemePropertySheet::fulfillThemeReqs() {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+void CMPCThemePropertySheet::fulfillThemeReqs()
+{
+    if (AppIsThemeLoaded()) {
         CMPCThemeUtil::fulfillThemeReqs((CWnd*)this);
     }
 }
 
-HBRUSH CMPCThemePropertySheet::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+HBRUSH CMPCThemePropertySheet::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+    if (AppIsThemeLoaded()) {
         LRESULT lResult;
         if (pWnd->SendChildNotifyLastMsg(&lResult)) {
             return (HBRUSH)lResult;

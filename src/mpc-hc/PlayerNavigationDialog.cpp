@@ -79,6 +79,7 @@ BEGIN_MESSAGE_MAP(CPlayerNavigationDialog, CMPCThemeResizableDialog)
     ON_UPDATE_COMMAND_UI(IDC_NAVIGATION_INFO, OnUpdateShowChannelInfoButton)
     ON_BN_CLICKED(IDC_NAVIGATION_SCAN, OnTunerScan)
     ON_BN_CLICKED(IDC_NAVIGATION_FILTERSTATIONS, OnTvRadioStations)
+    ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -216,9 +217,9 @@ void CPlayerNavigationDialog::OnContextMenu(CWnd* pWnd, CPoint point)
         M_REMOVE_ALL
     };
 
-    auto findChannelByItemNumber = [this](std::vector<CDVBChannel>& c, int nItem) {
+    auto findChannelByItemNumber = [this](std::vector<CBDAChannel>& c, int nItem) {
         int nPrefNumber = (int)m_channelList.GetItemData(nItem);
-        return find_if(c.begin(), c.end(), [&](CDVBChannel const & channel) {
+        return find_if(c.begin(), c.end(), [&](CBDAChannel const & channel) {
             return channel.GetPrefNumber() == nPrefNumber;
         });
     };
@@ -291,7 +292,7 @@ void CPlayerNavigationDialog::OnContextMenu(CWnd* pWnd, CPoint point)
                 const int nRemovedPrefNumber = it->GetPrefNumber();
                 s.m_DVBChannels.erase(it);
                 // Update channels pref number
-                for (CDVBChannel& channel : s.m_DVBChannels) {
+                for (CBDAChannel& channel : s.m_DVBChannels) {
                     const int nPrefNumber = channel.GetPrefNumber();
                     ASSERT(nPrefNumber != nRemovedPrefNumber);
                     if (nPrefNumber > nRemovedPrefNumber) {
@@ -338,3 +339,10 @@ void CPlayerNavigationDialog::OnContextMenu(CWnd* pWnd, CPoint point)
     }
 }
 
+void CPlayerNavigationDialog::OnSize(UINT nType, int cx, int cy) {
+    CMPCThemeResizableDialog::OnSize(nType, cx, cy);
+    if (m_channelList.m_hWnd) {
+        int nItem = m_channelList.GetCurSel();
+        m_channelList.EnsureVisible(nItem);
+    }
+}

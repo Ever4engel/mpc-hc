@@ -2,14 +2,17 @@
 # Copyright (C) 2002 - 2017 see Authors.txt
 # This file is distributed under the same license as the MPC-HC package.
 # Translators:
-# ever_green, 2014-2017
+# MPC HC <adiposegithub@gmail.com>, 2020
+# O SA, 2020
+# ever_green, 2020
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: MPC-HC\n"
-"POT-Creation-Date: 2016-01-17 21:31:34+0000\n"
-"PO-Revision-Date: 2017-08-13 20:49+0000\n"
-"Last-Translator: kasper93\n"
-"Language-Team: Japanese (http://www.transifex.com/mpc-hc/mpc-hc/language/ja/)\n"
+"POT-Creation-Date: 2020-08-09 19:14:33+0000\n"
+"PO-Revision-Date: 2020-01-02 07:46+0000\n"
+"Last-Translator: ever_green, 2020\n"
+"Language-Team: Japanese (https://www.transifex.com/mpchc/teams/106126/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -26,7 +29,7 @@ msgstr "クイック再生(&Q)..."
 
 msgctxt "ID_FILE_OPENMEDIA"
 msgid "&Open File/URL..."
-msgstr "ファイルを開く(&O)..."
+msgstr "ファイル/URL を開く(&O)..."
 
 msgctxt "ID_FILE_OPENDVDBD"
 msgid "Open &DVD/BD..."
@@ -88,6 +91,10 @@ msgctxt "ID_FILE_PROPERTIES"
 msgid "P&roperties"
 msgstr "プロパティ(&R)"
 
+msgctxt "ID_FILE_OPEN_LOCATION"
+msgid "Open File &Location"
+msgstr "ファイルの場所を開く(&L)"
+
 msgctxt "ID_FILE_EXIT"
 msgid "E&xit"
 msgstr "終了(&X)"
@@ -98,7 +105,7 @@ msgstr "表示(&V)"
 
 msgctxt "ID_VIEW_CAPTIONMENU"
 msgid "Caption&&Menu"
-msgstr "タイトル バーとメニュー バー(&M)"
+msgstr "タイトルとメニュー(&M)"
 
 msgctxt "ID_VIEW_SEEKER"
 msgid "See&k Bar"
@@ -142,7 +149,7 @@ msgstr "シェーダ デバッガ(&D)"
 
 msgctxt "ID_VIEW_MPCTHEME"
 msgid "Dark Theme (restart)"
-msgstr ""
+msgstr "ダーク テーマ (再起動)"
 
 msgctxt "POPUP"
 msgid "&Presets..."
@@ -168,6 +175,10 @@ msgctxt "POPUP"
 msgid "&Zoom"
 msgstr "拡大(&Z)"
 
+msgctxt "ID_VIEW_ZOOM_25"
+msgid "&25%"
+msgstr "&25%"
+
 msgctxt "ID_VIEW_ZOOM_50"
 msgid "&50%"
 msgstr "&50%"
@@ -186,7 +197,7 @@ msgstr "自動調整(&F)"
 
 msgctxt "ID_VIEW_ZOOM_AUTOFIT_LARGER"
 msgid "Auto Fit (&Larger Only)"
-msgstr "自動調整 (過大のみ)(&L)"
+msgstr "自動調整 (超過のみ)(&L)"
 
 msgctxt "POPUP"
 msgid "R&enderer Settings"
@@ -202,7 +213,7 @@ msgstr "統計情報を表示(&D)"
 
 msgctxt "ID_VIEW_OSD_DISPLAY_TIME"
 msgid "Display Current T&ime"
-msgstr "現在の再生時間を表示(&I)"
+msgstr "再生位置を表示(&I)"
 
 msgctxt "ID_VIEW_OSD_SHOW_FILENAME"
 msgid "Show &File Name"
@@ -226,19 +237,19 @@ msgstr "表示(&P)"
 
 msgctxt "ID_VIEW_D3DFULLSCREEN"
 msgid "D3D Fullscreen &Mode"
-msgstr "Direct3D フルスクリーン モード(&M)"
+msgstr "D3D フルスクリーン モード(&M)"
 
 msgctxt "ID_VIEW_FULLSCREENGUISUPPORT"
 msgid "D3D Fullscreen &GUI Support"
-msgstr "Direct3D フルスクリーン GUI 対応(&G)"
+msgstr "D3D フルスクリーン GUI 対応(&G)"
 
 msgctxt "ID_VIEW_HIGHCOLORRESOLUTION"
 msgid "10-bit &RGB Output"
-msgstr "10 ビット RGB 出力(&R)"
+msgstr "10-bit RGB 出力(&R)"
 
 msgctxt "ID_VIEW_FORCEINPUTHIGHCOLORRESOLUTION"
 msgid "Force 10-bit RGB &Input"
-msgstr "強制的に 10 ビット RGB 入力(&I)"
+msgstr "強制的に 10-bit RGB 入力(&I)"
 
 msgctxt "ID_VIEW_FULLFLOATINGPOINTPROCESSING"
 msgid "&Full Floating Point Processing"
@@ -254,11 +265,11 @@ msgstr "デスクトップ コンポジション (Aero) の無効化(&A)"
 
 msgctxt "ID_VIEW_ENABLEFRAMETIMECORRECTION"
 msgid "Enable Frame Time &Correction"
-msgstr "フレーム時間の補正を有効にする(&C)"
+msgstr "フレーム時間補正を有効にする(&C)"
 
 msgctxt "POPUP"
 msgid "&Color Management"
-msgstr "カラー調整(&C)"
+msgstr "色の管理(&C)"
 
 msgctxt "ID_VIEW_CM_ENABLE"
 msgid "&Enable"
@@ -414,7 +425,7 @@ msgstr "縦横比(&A)"
 
 msgctxt "ID_ASPECTRATIO_DAR"
 msgid "&Default (DAR)"
-msgstr "標準 (DAR)(&D)"
+msgstr "標準 (&DAR)"
 
 msgctxt "ID_ASPECTRATIO_4_3"
 msgid "&4:3"
@@ -438,7 +449,7 @@ msgstr "185:100(&8)"
 
 msgctxt "ID_ASPECTRATIO_SAR"
 msgid "Assume &square pixels (SAR)"
-msgstr "正方形ピクセルを想定 (SAR)(&S)"
+msgstr "正方形ピクセルを想定 (&SAR)"
 
 msgctxt "ID_VIEW_VF_COMPMONDESKARDIFF"
 msgid "&Correct Monitor/Desktop AR Diff"
@@ -491,6 +502,22 @@ msgstr "下へ移動(&D)"
 msgctxt "ID_PANSCAN_CENTER"
 msgid "Cen&ter"
 msgstr "中央へ戻す(&T)"
+
+msgctxt "ID_PANSCAN_ROTATEZM"
+msgid "Rotate Cloc&kwise"
+msgstr "時計回りに回転(&K)"
+
+msgctxt "ID_PANSCAN_ROTATEZ270"
+msgid "Rotate Counter-Clock&wise"
+msgstr "反時計回りに回転(&W)"
+
+msgctxt "ID_PANSCAN_ROTATEXM"
+msgid "&Flip Vertically"
+msgstr "上下反転(&F)"
+
+msgctxt "ID_PANSCAN_ROTATEYM"
+msgid "&Mirror"
+msgstr "左右反転(&M)"
 
 msgctxt "ID_VIEW_RESET"
 msgid "Re&set"
@@ -552,6 +579,82 @@ msgctxt "ID_PLAY_REPEAT_WHOLEPLAYLIST"
 msgid "&Playlist"
 msgstr "再生リスト(&P)"
 
+msgctxt "ID_PLAY_REPEAT_AB"
+msgid "A-B (&Reset)"
+msgstr "A-B リセット(&R)"
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_A"
+msgid "A-B (Mark &A)"
+msgstr "A-B 開始点(&A)"
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_B"
+msgid "A-B (Mark &B)"
+msgstr "A-B 終了点(&B)"
+
+msgctxt "POPUP"
+msgid "&Playback Rate"
+msgstr "再生速度(&P)"
+
+msgctxt "POPUP"
+msgid "0.25 x"
+msgstr "0.25 x"
+
+msgctxt "POPUP"
+msgid "0.50 x"
+msgstr "0.50 x"
+
+msgctxt "POPUP"
+msgid "0.75 x"
+msgstr "0.75 x"
+
+msgctxt "POPUP"
+msgid "0.90 x"
+msgstr "0.90 x"
+
+msgctxt "POPUP"
+msgid "1.00 x"
+msgstr "1.00 x"
+
+msgctxt "POPUP"
+msgid "1.10 x"
+msgstr "1.10 x"
+
+msgctxt "POPUP"
+msgid "1.25 x"
+msgstr "1.25 x"
+
+msgctxt "POPUP"
+msgid "1.50 x"
+msgstr "1.50 x"
+
+msgctxt "POPUP"
+msgid "2.00 x"
+msgstr "2.00 x"
+
+msgctxt "POPUP"
+msgid "3.00 x"
+msgstr "3.00 x"
+
+msgctxt "POPUP"
+msgid "4.00 x"
+msgstr "4.00 x"
+
+msgctxt "POPUP"
+msgid "6.00 x"
+msgstr "6.00 x"
+
+msgctxt "POPUP"
+msgid "8.00 x"
+msgstr "8.00 x"
+
+msgctxt "POPUP"
+msgid "24 fps"
+msgstr "24 fps"
+
+msgctxt "POPUP"
+msgid "25 fps"
+msgstr "25 fps"
+
 msgctxt "ID_PLAY_DECRATE"
 msgid "&Decrease Rate"
 msgstr "再生速度 遅く(&D)"
@@ -602,7 +705,7 @@ msgstr "ミュート(&M)"
 
 msgctxt "POPUP"
 msgid "Af&ter Playback"
-msgstr "再生終了後の動作(&T)"
+msgstr "再生終了後(&T)"
 
 msgctxt "ID_AFTERPLAYBACK_DONOTHING"
 msgid "Do no&thing"
@@ -610,7 +713,7 @@ msgstr "何もしない(&T)"
 
 msgctxt "ID_AFTERPLAYBACK_PLAYNEXT"
 msgid "Play &next file in the folder"
-msgstr "フォルダ内を順次再生する(&N)"
+msgstr "フォルダ内を順次再生(&N)"
 
 msgctxt "ID_AFTERPLAYBACK_MONITOROFF"
 msgid "Turn off the &monitor"
@@ -654,7 +757,7 @@ msgstr "次へ(&N)"
 
 msgctxt "ID_NAVIGATE_GOTO"
 msgid "&Go To..."
-msgstr "指定位置に移動(&G)..."
+msgstr "移動(&G)..."
 
 msgctxt "ID_NAVIGATE_TITLEMENU"
 msgid "&Title Menu"
@@ -711,4 +814,3 @@ msgstr "寄付(&D)"
 msgctxt "ID_HELP_ABOUT"
 msgid "&About..."
 msgstr "バージョン情報(&A)..."
-

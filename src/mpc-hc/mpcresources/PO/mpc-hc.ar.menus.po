@@ -2,18 +2,16 @@
 # Copyright (C) 2002 - 2017 see Authors.txt
 # This file is distributed under the same license as the MPC-HC package.
 # Translators:
-# Ahmad Abd-Elghany <tolpa1@gmail.com>, 2013-2014
-# Abubakr Mohammed <bcs2610@hotmail.com>, 2014
-# Mubarak Qahtani <abu-q76@hotmail.com>, 2016
-# Tariq <tariq-mz@hotmail.com>, 2014
-# manxx55 <w6txz2@gmail.com>, 2014-2015
+# MPC HC <adiposegithub@gmail.com>, 2020
+# Abdullah Almofleh <almofleh.abdullah@gmail.com>, 2020
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: MPC-HC\n"
-"POT-Creation-Date: 2016-01-17 21:31:34+0000\n"
-"PO-Revision-Date: 2017-08-13 20:50+0000\n"
-"Last-Translator: kasper93\n"
-"Language-Team: Arabic (http://www.transifex.com/mpc-hc/mpc-hc/language/ar/)\n"
+"POT-Creation-Date: 2020-08-09 19:14:33+0000\n"
+"PO-Revision-Date: 2020-01-02 07:46+0000\n"
+"Last-Translator: Abdullah Almofleh <almofleh.abdullah@gmail.com>, 2020\n"
+"Language-Team: Arabic (https://www.transifex.com/mpchc/teams/106126/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -91,6 +89,10 @@ msgstr "رفع الترجمة"
 msgctxt "ID_FILE_PROPERTIES"
 msgid "P&roperties"
 msgstr "خصائص"
+
+msgctxt "ID_FILE_OPEN_LOCATION"
+msgid "Open File &Location"
+msgstr "افتح ملف & مكان"
 
 msgctxt "ID_FILE_EXIT"
 msgid "E&xit"
@@ -171,6 +173,10 @@ msgstr "ملء الشاشة"
 msgctxt "POPUP"
 msgid "&Zoom"
 msgstr "زوم"
+
+msgctxt "ID_VIEW_ZOOM_25"
+msgid "&25%"
+msgstr ""
 
 msgctxt "ID_VIEW_ZOOM_50"
 msgid "&50%"
@@ -496,6 +502,22 @@ msgctxt "ID_PANSCAN_CENTER"
 msgid "Cen&ter"
 msgstr "توسيط"
 
+msgctxt "ID_PANSCAN_ROTATEZM"
+msgid "Rotate Cloc&kwise"
+msgstr ""
+
+msgctxt "ID_PANSCAN_ROTATEZ270"
+msgid "Rotate Counter-Clock&wise"
+msgstr ""
+
+msgctxt "ID_PANSCAN_ROTATEXM"
+msgid "&Flip Vertically"
+msgstr ""
+
+msgctxt "ID_PANSCAN_ROTATEYM"
+msgid "&Mirror"
+msgstr ""
+
 msgctxt "ID_VIEW_RESET"
 msgid "Re&set"
 msgstr "إعادة ضبط"
@@ -555,6 +577,82 @@ msgstr "ملف"
 msgctxt "ID_PLAY_REPEAT_WHOLEPLAYLIST"
 msgid "&Playlist"
 msgstr "قائمة التشغيل"
+
+msgctxt "ID_PLAY_REPEAT_AB"
+msgid "A-B (&Reset)"
+msgstr ""
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_A"
+msgid "A-B (Mark &A)"
+msgstr ""
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_B"
+msgid "A-B (Mark &B)"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "&Playback Rate"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.25 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.50 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.75 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.90 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.10 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.25 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.50 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "2.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "3.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "4.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "6.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "8.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "24 fps"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "25 fps"
+msgstr ""
 
 msgctxt "ID_PLAY_DECRATE"
 msgid "&Decrease Rate"
@@ -715,4 +813,3 @@ msgstr "تبرع"
 msgctxt "ID_HELP_ABOUT"
 msgid "&About..."
 msgstr "حول..."
-

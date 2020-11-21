@@ -55,7 +55,7 @@ INT_PTR CPPageInternalFiltersListBox::OnToolHitTest(CPoint point, TOOLINFO* pTI)
     GetItemRect(row, r, LVIR_BOUNDS);
     pTI->rect = r;
     pTI->hwnd = m_hWnd;
-    pTI->uId = (UINT)(row+1); //uId should not be zero for MPCThemeTT
+    pTI->uId = (UINT)(row + 1); //uId should not be zero for MPCThemeTT
     pTI->lpszText = LPSTR_TEXTCALLBACK;
     pTI->uFlags |= TTF_ALWAYSTIP;
 
@@ -71,8 +71,12 @@ BOOL CPPageInternalFiltersListBox::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESU
 {
     TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
 
+    if (!pNMHDR->idFrom) {
+        return FALSE;
+    }
+
     filter_t* f = (filter_t*)GetItemData(static_cast<int>(pNMHDR->idFrom - 1));
-    if (f->nHintID == 0) {
+    if (!f || f->nHintID == 0) {
         return FALSE;
     }
 
@@ -168,7 +172,7 @@ void CPPageInternalFiltersListBox::OnContextMenu(CWnd* pWnd, CPoint point)
         state = (m_nbChecked[VIDEO_DECODER] != 0) ? MF_ENABLED : MF_GRAYED;
         m.AppendMenu(MF_STRING | state, DISABLE_VIDEO, ResStr(IDS_DISABLE_VIDEO_FILTERS));
     }
-    if (AfxGetAppSettings().bMPCThemeLoaded) {
+    if (AppIsThemeLoaded()) {
         m.fulfillThemeReqs();
     }
 

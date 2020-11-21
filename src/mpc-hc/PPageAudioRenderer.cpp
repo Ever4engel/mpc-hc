@@ -26,7 +26,7 @@
 
 #include <FunctionDiscoveryKeys_devpkey.h>
 #include <Mmdeviceapi.h>
-#include <sanear/sanear/src/Settings.h>
+#include <sanear/src/Settings.h>
 #include "AppSettings.h"
 
 namespace
@@ -66,7 +66,7 @@ namespace
 }
 
 CPPageAudioRenderer::CPPageAudioRenderer()
-    : CMPCThemePPageBase(IDD, VersionInfo::IsLite() ? IDS_PPAGE_OUTPUT_AUD_INTERNAL_REND : IDD_PPAGEAUDIORENDERER)
+    : CMPCThemePPageBase(IDD, IDD_PPAGEAUDIORENDERER)
     , m_bExclusiveMode(FALSE)
     , m_bAllowBitstreaming(TRUE)
     , m_bCrossfeedEnabled(FALSE)

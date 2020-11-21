@@ -2,20 +2,16 @@
 # Copyright (C) 2002 - 2017 see Authors.txt
 # This file is distributed under the same license as the MPC-HC package.
 # Translators:
-# 洪嘉鴻 <jerry9030@gmail.com>, 2015
-# Chien Wei Lin <cwlin0416@gmail.com>, 2016
-# kenelin <kenelin@gmail.com>, 2013
-# Ken <ken670128@yahoo.com.tw>, 2015
-# Peter Chen <petercpg@gmail.com>, 2014
-# wck317 <wck317@pchome.com.tw>, 2017
-# 洪嘉鴻 <jerry9030@gmail.com>, 2015-2016
+# MPC HC <adiposegithub@gmail.com>, 2020
+# Peter Chen <petercpg@gmail.com>, 2020
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: MPC-HC\n"
-"POT-Creation-Date: 2016-01-17 21:31:34+0000\n"
-"PO-Revision-Date: 2017-08-13 20:50+0000\n"
-"Last-Translator: kasper93\n"
-"Language-Team: Chinese (Taiwan) (http://www.transifex.com/mpc-hc/mpc-hc/language/zh_TW/)\n"
+"POT-Creation-Date: 2020-08-09 19:14:33+0000\n"
+"PO-Revision-Date: 2020-01-02 07:46+0000\n"
+"Last-Translator: Peter Chen <petercpg@gmail.com>, 2020\n"
+"Language-Team: Chinese (Taiwan) (https://www.transifex.com/mpchc/teams/106126/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -72,7 +68,7 @@ msgstr "儲存縮圖(&T)..."
 
 msgctxt "POPUP"
 msgid "S&ubtitles"
-msgstr "字幕"
+msgstr "字幕 (&U)"
 
 msgctxt "ID_FILE_SUBTITLES_LOAD"
 msgid "&Load Subtitles..."
@@ -93,6 +89,10 @@ msgstr "上傳字幕(&U)..."
 msgctxt "ID_FILE_PROPERTIES"
 msgid "P&roperties"
 msgstr "內容(&R)"
+
+msgctxt "ID_FILE_OPEN_LOCATION"
+msgid "Open File &Location"
+msgstr "開啟檔案位置 (&L)"
 
 msgctxt "ID_FILE_EXIT"
 msgid "E&xit"
@@ -148,7 +148,7 @@ msgstr "著色器除錯(&D)"
 
 msgctxt "ID_VIEW_MPCTHEME"
 msgid "Dark Theme (restart)"
-msgstr ""
+msgstr "暗色佈景主題（需要重新啟動）"
 
 msgctxt "POPUP"
 msgid "&Presets..."
@@ -174,6 +174,10 @@ msgctxt "POPUP"
 msgid "&Zoom"
 msgstr "縮放(&Z)"
 
+msgctxt "ID_VIEW_ZOOM_25"
+msgid "&25%"
+msgstr "&25%"
+
 msgctxt "ID_VIEW_ZOOM_50"
 msgid "&50%"
 msgstr "50% (&5)"
@@ -192,7 +196,7 @@ msgstr "自動調整(&F)"
 
 msgctxt "ID_VIEW_ZOOM_AUTOFIT_LARGER"
 msgid "Auto Fit (&Larger Only)"
-msgstr "自動調整 (僅限解像度過大時) (&L)"
+msgstr "自動調整（僅限解析度過大時）(&L)"
 
 msgctxt "POPUP"
 msgid "R&enderer Settings"
@@ -240,11 +244,11 @@ msgstr "D3D 全螢幕 GUI 支援(&G)"
 
 msgctxt "ID_VIEW_HIGHCOLORRESOLUTION"
 msgid "10-bit &RGB Output"
-msgstr "10位元 RGB 輸出(&R)"
+msgstr "10 位元 RGB 輸出(&R)"
 
 msgctxt "ID_VIEW_FORCEINPUTHIGHCOLORRESOLUTION"
 msgid "Force 10-bit RGB &Input"
-msgstr "強制 10位元 RGB 輸入(&I)"
+msgstr "強制 10 位元 RGB 輸入(&I)"
 
 msgctxt "ID_VIEW_FULLFLOATINGPOINTPROCESSING"
 msgid "&Full Floating Point Processing"
@@ -252,7 +256,7 @@ msgstr "全浮點處理(&F)"
 
 msgctxt "ID_VIEW_HALFFLOATINGPOINTPROCESSING"
 msgid "&Half Floating Point Processing"
-msgstr "半浮點處理"
+msgstr "半浮點處理 (&H)"
 
 msgctxt "ID_VIEW_DISABLEDESKTOPCOMPOSITION"
 msgid "Disable desktop composition (&Aero)"
@@ -372,11 +376,11 @@ msgstr "重設(&E)"
 
 msgctxt "ID_VIEW_RESET_DEFAULT"
 msgid "Reset to &default renderer settings"
-msgstr "重設為預設的繪製器設定(˙&D)"
+msgstr "重設為預設繪製器設定 (&D)"
 
 msgctxt "ID_VIEW_RESET_OPTIMAL"
 msgid "Reset to &optimal renderer settings"
-msgstr "重設為最佳的繪製器設定(&O)"
+msgstr "重設為最佳繪製器設定 (&O)"
 
 msgctxt "POPUP"
 msgid "Video &Frame"
@@ -498,6 +502,22 @@ msgctxt "ID_PANSCAN_CENTER"
 msgid "Cen&ter"
 msgstr "置中(&T)"
 
+msgctxt "ID_PANSCAN_ROTATEZM"
+msgid "Rotate Cloc&kwise"
+msgstr "順時鐘旋轉 (&K)"
+
+msgctxt "ID_PANSCAN_ROTATEZ270"
+msgid "Rotate Counter-Clock&wise"
+msgstr "逆時鐘旋轉 (&W)"
+
+msgctxt "ID_PANSCAN_ROTATEXM"
+msgid "&Flip Vertically"
+msgstr "垂直翻轉 (&F)"
+
+msgctxt "ID_PANSCAN_ROTATEYM"
+msgid "&Mirror"
+msgstr "映射 (&M)"
+
 msgctxt "ID_VIEW_RESET"
 msgid "Re&set"
 msgstr "重設(&S)"
@@ -516,7 +536,7 @@ msgstr "總是如此(&A)"
 
 msgctxt "ID_ONTOP_WHILEPLAYING"
 msgid "While &Playing"
-msgstr "當正在播放時(&P)"
+msgstr "當播放任何檔案時(&P)"
 
 msgctxt "ID_ONTOP_WHILEPLAYINGVIDEO"
 msgid "While Playing &Video"
@@ -544,7 +564,7 @@ msgstr "單格步進(&R)"
 
 msgctxt "POPUP"
 msgid "&Repeat"
-msgstr "重複"
+msgstr "重複 (&R)"
 
 msgctxt "ID_PLAY_REPEAT_FOREVER"
 msgid "F&orever"
@@ -557,6 +577,82 @@ msgstr "檔案(&F)"
 msgctxt "ID_PLAY_REPEAT_WHOLEPLAYLIST"
 msgid "&Playlist"
 msgstr "播放清單(&P)"
+
+msgctxt "ID_PLAY_REPEAT_AB"
+msgid "A-B (&Reset)"
+msgstr "重設 A-B 點重複播放範圍 (&R)"
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_A"
+msgid "A-B (Mark &A)"
+msgstr "A-B 點重複播放 (&A 點)"
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_B"
+msgid "A-B (Mark &B)"
+msgstr "A-B 點重複播放 (&B 點)"
+
+msgctxt "POPUP"
+msgid "&Playback Rate"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.25 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.50 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.75 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.90 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.10 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.25 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.50 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "2.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "3.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "4.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "6.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "8.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "24 fps"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "25 fps"
+msgstr ""
 
 msgctxt "ID_PLAY_DECRATE"
 msgid "&Decrease Rate"
@@ -717,4 +813,3 @@ msgstr "捐贈(&D)"
 msgctxt "ID_HELP_ABOUT"
 msgid "&About..."
 msgstr "關於(&A)..."
-

@@ -32,7 +32,7 @@
 #include "PathUtils.h"
 #include "SyncAllocatorPresenter.h"
 #include "mplayerc.h"
-#include "sanear/sanear/src/Factory.h"
+#include "sanear/src/Factory.h"
 #include <d3d9.h>
 #include <evr.h>
 #include <evr9.h>
@@ -378,11 +378,11 @@ HRESULT CFGManager::EnumSourceFilters(LPCWSTR lpcwstrFileName, CFGFilterList& fl
 
     if (hFile != INVALID_HANDLE_VALUE) {
         CloseHandle(hFile);
-    }
 
-    CFGFilter* pFGF = LookupFilterRegistry(CLSID_AsyncReader, m_override);
-    pFGF->AddType(MEDIATYPE_Stream, MEDIASUBTYPE_NULL);
-    fl.Insert(pFGF, 9);
+        CFGFilter* pFGF = LookupFilterRegistry(CLSID_AsyncReader, m_override);
+        pFGF->AddType(MEDIATYPE_Stream, MEDIASUBTYPE_NULL);
+        fl.Insert(pFGF, 9);
+    }
 
     return S_OK;
 }
@@ -733,12 +733,14 @@ HRESULT CFGManager::Connect(IPin* pPinOut, IPin* pPinIn, bool bContinueRender)
         while (pos) {
             CFGFilter* pFGF = fl.GetNext(pos);
 
+#if 0
             // Checks if madVR is already in the graph to avoid two instances at the same time
             CComPtr<IBaseFilter> pBFmadVR;
-            FindFilterByName(_T("madVR Renderer"), &pBFmadVR);
-            if (pBFmadVR && (pFGF->GetName() == _T("madVR Renderer"))) {
+            FindFilterByName(_T("madVR"), &pBFmadVR);
+            if (pBFmadVR && (pFGF->GetName() == _T("madVR"))) {
                 continue;
             }
+#endif
 
             if (pMadVRAllocatorPresenter && (pFGF->GetCLSID() == CLSID_madVR)) {
                 // the pure madVR filter was selected (without the allocator presenter)
@@ -753,6 +755,15 @@ HRESULT CFGManager::Connect(IPin* pPinOut, IPin* pPinIn, bool bContinueRender)
             CInterfaceList<IUnknown, &IID_IUnknown> pUnks;
             if (FAILED(pFGF->Create(&pBF, pUnks))) {
                 TRACE(_T("     --> Filter creation failed\n"));
+                // Check if selected video renderer fails to load
+                CLSID filter = pFGF->GetCLSID();
+                if (filter == CLSID_EVRAllocatorPresenter || filter == CLSID_VMR9AllocatorPresenter || filter == CLSID_MPCVRAllocatorPresenter || filter == CLSID_madVRAllocatorPresenter || filter == CLSID_DXRAllocatorPresenter) {
+                    if (IDYES == AfxMessageBox(_T("The selected video renderer has failed to load.\n\nThis problem is often caused by a bug in the graphics driver. Or you may be using a generic driver which has limited capabilities. It is recommended to update the graphics driver to solve this problem. A proper driver is required for optimal video playback performance and quality.\n\nThe player will now fallback to using a basic video renderer, which has reduced performance and quality. Subtitles may also fail to load for current video.\n\nYou can select a different renderer here:\nOptions > playback > Output\n\nDo you want to use the basic video renderer by default?"), MB_ICONEXCLAMATION | MB_YESNO, 0)) {
+                        CAppSettings& s = AfxGetAppSettings();
+                        s.iDSVideoRendererType = IsCLSIDRegistered(CLSID_EnhancedVideoRenderer) ? VIDRNDT_DS_EVR : VIDRNDT_DS_VMR9WINDOWED;
+                        s.SetSubtitleRenderer(CAppSettings::SubtitleRenderer::VS_FILTER);
+                    }
+                }
                 continue;
             }
 
@@ -1384,7 +1395,8 @@ CFGManagerCustom::CFGManagerCustom(LPCTSTR pName, LPUNKNOWN pUnk)
 #if INTERNAL_SOURCEFILTER_RFS
     if (src[SRC_RFS]) {
         pFGF = DEBUG_NEW CFGFilterInternal<CRARFileSource>();
-        pFGF->m_chkbytes.AddTail(_T("0,7,,526172211A0700"));
+        pFGF->m_chkbytes.AddTail(_T("0,7,,526172211A0700")); //rar4 signature
+        pFGF->m_chkbytes.AddTail(_T("0,8,,526172211A070100")); //rar5 signature
         pFGF->m_extensions.AddTail(_T(".rar"));
         m_source.AddTail(pFGF);
     }
@@ -2214,6 +2226,18 @@ CFGManagerCustom::CFGManagerCustom(LPCTSTR pName, LPUNKNOWN pUnk)
     // palm demuxer crashes (even crashes graphedit when dropping an .ac3 onto it)
     m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(GUIDFromCString(_T("{BE2CF8A7-08CE-4A2C-9A25-FD726A999196}")), MERIT64_DO_NOT_USE));
 
+    // mainconcept color space converter
+    m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(GUIDFromCString(_T("{272D77A0-A852-4851-ADA4-9091FEAD4C86}")), MERIT64_DO_NOT_USE));
+
+    // Accusoft PICVideo M-JPEG Codec
+    m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(GUIDFromCString(_T("{4C4CD9E1-F876-11D2-962F-00500471FDDC}")), MERIT64_DO_NOT_USE));
+
+    // SolveigMM MP4 Demultiplexer (smm_mp4demuxer.ax)
+    m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(GUIDFromCString(_T("{5F19B8FE-BA79-4183-B3CF-FEE4E8F801E4}")), MERIT64_DO_NOT_USE));
+
+    // Morgan's Stream Switcher (mmswitch.ax)
+    m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(CLSID_MorganStreamSwitcher, MERIT64_DO_NOT_USE));
+
     // DCDSPFilter (early versions crash mpc)
     {
         CRegKey key;
@@ -2231,14 +2255,7 @@ CFGManagerCustom::CFGManagerCustom(LPCTSTR pName, LPUNKNOWN pUnk)
         }
     }
 
-    /*
-        // NVIDIA Transport Demux crashed for someone, I could not reproduce it
-        m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(GUIDFromCString(_T("{735823C1-ACC4-11D3-85AC-006008376FB8}")), MERIT64_DO_NOT_USE));
-    */
-
-    // mainconcept color space converter
-    m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(GUIDFromCString(_T("{272D77A0-A852-4851-ADA4-9091FEAD4C86}")), MERIT64_DO_NOT_USE));
-
+    // Block unwanted subtitle filters
     if (s.fBlockVSFilter) {
         switch (s.GetSubtitleRenderer()) {
             case CAppSettings::SubtitleRenderer::INTERNAL:
@@ -2272,9 +2289,6 @@ CFGManagerCustom::CFGManagerCustom(LPCTSTR pName, LPUNKNOWN pUnk)
                 break;
         }
     }
-
-    // Blacklist Accusoft PICVideo M-JPEG Codec 2.1 since causes a DEP crash
-    m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(GUIDFromCString(_T("{4C4CD9E1-F876-11D2-962F-00500471FDDC}")), MERIT64_DO_NOT_USE));
 
     // Add preferred subtitle filter
     switch (s.GetSubtitleRenderer()) {
@@ -2424,9 +2438,6 @@ CFGManagerPlayer::CFGManagerPlayer(LPCTSTR pName, LPUNKNOWN pUnk, HWND hWnd)
         pFGF = DEBUG_NEW CFGFilterInternal<CAudioSwitcherFilter>(L"Audio Switcher", renderer_merit + 0x100);
         pFGF->AddType(MEDIATYPE_Audio, MEDIASUBTYPE_NULL);
         m_transform.AddTail(pFGF);
-
-        // Blacklist Morgan's Stream Switcher
-        m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(CLSID_MorganStreamSwitcher, MERIT64_DO_NOT_USE));
     }
 
     // Renderers
@@ -2620,9 +2631,6 @@ CFGManagerCapture::CFGManagerCapture(LPCTSTR pName, LPUNKNOWN pUnk, HWND hWnd)
     CFGFilter* pFGF = DEBUG_NEW CFGFilterInternal<CDeinterlacerFilter>(L"Deinterlacer", MERIT64(0x800001) + 0x200);
     pFGF->AddType(MEDIATYPE_Video, MEDIASUBTYPE_NULL);
     m_transform.AddTail(pFGF);
-
-    // Blacklist Morgan's Stream Switcher
-    m_transform.AddTail(DEBUG_NEW CFGFilterRegistry(CLSID_MorganStreamSwitcher, MERIT64_DO_NOT_USE));
 }
 
 //

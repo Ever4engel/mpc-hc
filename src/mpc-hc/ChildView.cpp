@@ -25,6 +25,7 @@
 #include "MainFrm.h"
 #include "CMPCTheme.h"
 #include "CMPCThemeUtil.h"
+#include "ColorProfileUtil.h"
 
 CChildView::CChildView(CMainFrame* pMainFrame)
     : m_vrect(0, 0, 0, 0)
@@ -155,15 +156,15 @@ void CChildView::LoadImgInternal(HGDIOBJ hImg)
         s.fLogoExternal = false;               // use the built-in logo instead
         s.strLogoFileName.Empty();             // clear logo file name
         UINT useLogoId = s.nLogoId;
-        if ((UINT)-1 == useLogoId) { //if the user has never chosen a logo, we can try loading a theme default logo
-            if (s.bMPCThemeLoaded) {
+        if ((UINT) - 1 == useLogoId) { //if the user has never chosen a logo, we can try loading a theme default logo
+            if (AppIsThemeLoaded()) {
                 useLogoId = CMPCThemeUtil::defaultLogo();
             } else {
                 useLogoId = DEF_LOGO;
             }
         }
         if (!m_img.Load(useLogoId)) {          // try the latest selected build-in logo
-            s.nLogoId = (UINT)-1; //-1 == never selected, will default
+            s.nLogoId = (UINT) - 1; //-1 == never selected, will default
             m_img.Load(DEF_LOGO);  // if fail then use the default logo, should and must never fail
         }
     }
@@ -196,6 +197,8 @@ void CChildView::OnPaint()
 
 BOOL CChildView::OnEraseBkgnd(CDC* pDC)
 {
+    if (!pDC) return FALSE;
+
     CRect r;
 
     CImage img;
@@ -240,6 +243,8 @@ BOOL CChildView::OnEraseBkgnd(CDC* pDC)
                 SetStretchBltMode(hDC, STRETCH_HALFTONE);
                 img.StretchBlt(hDC, 0, 0, r.Width(), r.Height(), SRCCOPY);
                 m_resizedImg.ReleaseDC();
+
+                ColorProfileUtil::applyColorProfile(m_hWnd, m_resizedImg);
             }
 
             m_resizedImg.BitBlt(*pDC, r.TopLeft());

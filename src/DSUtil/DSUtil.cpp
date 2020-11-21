@@ -34,6 +34,7 @@
 #include "moreuuids.h"
 #include <dxva.h>
 #include <dxva2api.h>
+#include <locale.h>
 
 int CountPins(IBaseFilter* pBF, int& nIn, int& nOut, int& nInC, int& nOutC)
 {
@@ -153,11 +154,16 @@ bool IsAudioWaveRenderer(IBaseFilter* pBF)
 
     return clsid == CLSID_DSoundRender ||
            clsid == CLSID_AudioRender ||
-           clsid == CLSID_ReClock ||
-           clsid == __uuidof(CNullAudioRenderer) ||
-           clsid == __uuidof(CNullUAudioRenderer) ||
            clsid == CLSID_SANEAR_INTERNAL ||
-           clsid == CLSID_SANEAR;
+           clsid == CLSID_SANEAR ||
+           clsid == CLSID_ReClock ||
+           clsid == CLSID_MPCBEAudioRenderer ||
+           clsid == GUIDFromCString(L"{EC9ED6FC-7B03-4cb6-8C01-4EABE109F26B}") || // MediaPortal Audio Renderer
+           clsid == GUIDFromCString(L"{50063380-2B2F-4855-9A1E-40FCA344C7AC}") || // Surodev ASIO Renderer
+           clsid == GUIDFromCString(L"{8DE31E85-10FC-4088-8861-E0EC8E70744A}") || // MultiChannel ASIO Renderer
+           clsid == GUIDFromCString(L"{205F9417-8EEF-40B4-91CF-C7C6A96936EF}") || // MBSE MultiChannel ASIO Renderer
+           clsid == __uuidof(CNullAudioRenderer) ||
+           clsid == __uuidof(CNullUAudioRenderer);
 }
 
 IBaseFilter* GetUpStreamFilter(IBaseFilter* pBF, IPin* pInputPin)
@@ -892,9 +898,9 @@ DVD_HMSF_TIMECODE RT2HMSF(REFERENCE_TIME rt, double fps /*= 0.0*/) // use to rem
     return hmsf;
 }
 
-DVD_HMSF_TIMECODE RT2HMS_r(REFERENCE_TIME rt) // used only for information (for display on the screen)
+DVD_HMSF_TIMECODE RT2HMS(REFERENCE_TIME rt) // used only for information (for display on the screen)
 {
-    rt = (rt + 5000000) / 10000000;
+    rt = rt / 10000000;
     DVD_HMSF_TIMECODE hmsf = {
         (BYTE)(rt / 3600),
         (BYTE)(rt / 60 % 60),
@@ -903,6 +909,12 @@ DVD_HMSF_TIMECODE RT2HMS_r(REFERENCE_TIME rt) // used only for information (for 
     };
 
     return hmsf;
+}
+
+DVD_HMSF_TIMECODE RT2HMS_r(REFERENCE_TIME rt) // used only for information (for display on the screen)
+{
+    // round to nearest second
+    return RT2HMS(rt + 5000000);
 }
 
 REFERENCE_TIME HMSF2RT(DVD_HMSF_TIMECODE hmsf, double fps /*= -1.0*/)
@@ -1849,4 +1861,41 @@ void CorrectComboBoxHeaderWidth(CWnd* pComboBox)
 
     r.right = r.left + ::GetSystemMetrics(SM_CXMENUCHECK) + ::GetSystemMetrics(SM_CXEDGE) + szText.cx + tm.tmAveCharWidth;
     pComboBox->MoveWindow(r);
+}
+
+CString NormalizeUnicodeStrForSearch(CString srcStr, LANGID langid) {
+    if (srcStr.IsEmpty()) return srcStr;
+    wchar_t* src;
+
+    _locale_t locale;
+    LCID lcid = MAKELCID(MAKELANGID(langid, SUBLANG_DEFAULT), SORT_DEFAULT);
+    wchar_t localeName[32];
+    if (0 == LCIDToLocaleName(lcid, localeName, 32, LOCALE_ALLOW_NEUTRAL_NAMES)) { //try to lowercase by locale, but if not, do a regular MakeLower()
+        srcStr.MakeLower();
+        src = srcStr.GetBuffer();
+    } else {
+        src = srcStr.GetBuffer();
+        locale = _wcreate_locale(LC_ALL, localeName);
+        _wcslwr_s_l(src, wcslen(src) + 1, locale);
+    }
+
+    int dstLen = wcslen(src) * 4;
+    wchar_t* dest = DEBUG_NEW wchar_t[dstLen];
+
+    int cchActual = NormalizeString(NormalizationKD, src, -1, dest, dstLen);
+    if (cchActual <= 0) dest[0] = 0;
+    WORD* rgType = DEBUG_NEW WORD[dstLen];
+    GetStringTypeW(CT_CTYPE3, dest, -1, rgType);
+    PWSTR pszWrite = dest;
+    for (int i = 0; dest[i]; i++) {
+        if (!(rgType[i] & C3_NONSPACING)) {
+            *pszWrite++ = dest[i];
+        }
+    }
+    *pszWrite = 0;
+    delete[] rgType;
+
+    CString ret = dest;
+    delete[] dest;
+    return ret;
 }

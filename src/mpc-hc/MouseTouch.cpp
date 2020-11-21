@@ -313,6 +313,7 @@ void CMouse::InternalOnLButtonDown(UINT nFlags, const CPoint& point)
         }
         return ret;
     };
+
     m_drag = (!onButton() && !bIsOnFS) ? Drag::BEGIN_DRAG : Drag::NO_DRAG;
     if (m_drag == Drag::BEGIN_DRAG) {
         GetWnd().SetCapture();
@@ -395,6 +396,12 @@ BOOL CMouse::InternalOnMouseWheel(UINT nFlags, short zDelta, const CPoint& point
            FALSE;
 }
 
+BOOL CMouse::OnMouseHWheelImpl(UINT nFlags, short zDelta, const CPoint& point) {
+    return zDelta > 0 ? OnButton(wmcmd::WRIGHT, point) :
+        zDelta < 0 ? OnButton(wmcmd::WLEFT, point) :
+        FALSE;
+}
+
 bool CMouse::SelectCursor(const CPoint& screenPoint, const CPoint& clientPoint, UINT nFlags)
 {
     const auto& s = AfxGetAppSettings();
@@ -471,15 +478,26 @@ bool CMouse::TestDrag(const CPoint& screenPoint)
     bool ret = false;
     if (m_drag == Drag::BEGIN_DRAG) {
         ASSERT(!IsOnFullscreenWindow());
-        bool bUpAssigned = !!AssignedToCmd(wmcmd::LUP, false);
-        if ((!bUpAssigned && screenPoint != m_beginDragPoint) ||
+        bool checkDrag = true;
+        if (m_pMainFrame->IsZoomed()) {
+            CRect r;
+            GetWnd().GetWindowRect(r);
+            int maxDim = std::max(r.Width(), r.Height()) / 10;
+            CPoint diff = screenPoint - m_beginDragPoint;
+            checkDrag = (diff.x * diff.x + diff.y * diff.y) > maxDim*maxDim; //if dragged 10% screen maxDim start dragging
+        }
+
+        if (checkDrag) {
+            bool bUpAssigned = !!AssignedToCmd(wmcmd::LUP, false);
+            if ((!bUpAssigned && screenPoint != m_beginDragPoint) ||
                 (bUpAssigned && !PointEqualsImprecise(screenPoint, m_beginDragPoint,
-                                                      GetSystemMetrics(SM_CXDRAG), GetSystemMetrics(SM_CYDRAG)))) {
-            VERIFY(ReleaseCapture());
-            m_pMainFrame->PostMessage(WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(m_beginDragPoint.x, m_beginDragPoint.y));
-            m_drag = Drag::DRAGGED;
-            m_bLeftDown = false;
-            ret = true;
+                    GetSystemMetrics(SM_CXDRAG), GetSystemMetrics(SM_CYDRAG)))) {
+                VERIFY(ReleaseCapture());
+                m_pMainFrame->PostMessage(WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(m_beginDragPoint.x, m_beginDragPoint.y));
+                m_drag = Drag::DRAGGED;
+                m_bLeftDown = false;
+                ret = true;
+            }
         }
     } else {
         m_drag = Drag::NO_DRAG;
@@ -543,6 +561,7 @@ BEGIN_MESSAGE_MAP(CMouseWnd, CWnd)
     ON_WM_XBUTTONUP()
     ON_WM_XBUTTONDBLCLK()
     ON_WM_MOUSEWHEEL()
+    ON_WM_MOUSEHWHEEL()
     ON_WM_SETCURSOR()
     ON_WM_MOUSEMOVE()
     ON_WM_MOUSELEAVE()
@@ -610,6 +629,12 @@ void CMouseWnd::OnXButtonDblClk(UINT nFlags, UINT nButton, CPoint point)
 BOOL CMouseWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint point)
 {
     return CMouse::InternalOnMouseWheel(nFlags, zDelta, point);
+}
+
+void CMouseWnd::OnMouseHWheel(UINT nFlags, short zDelta, CPoint point) {
+    if (!CMouse::OnMouseHWheelImpl(nFlags, zDelta, point)) {
+        Default();
+    }
 }
 
 BOOL CMouseWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)

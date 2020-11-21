@@ -36,7 +36,7 @@ interface ISubStream;
 
 
 class CPlayerSubresyncBar : public CMPCThemePlayerBar
-    ,public CMPCThemeListCtrlCustomInterface
+    , public CMPCThemeListCtrlCustomInterface
 {
     DECLARE_DYNAMIC(CPlayerSubresyncBar)
 
@@ -50,6 +50,9 @@ private:
 
     CFont m_font;
     void ScaleFont();
+
+	int m_itemHeight = 0;
+	bool createdWindow;
 
     EventClient m_eventc;
     void EventCallback(MpcEvent ev);
@@ -152,7 +155,7 @@ public:
 protected:
     virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
     virtual BOOL PreTranslateMessage(MSG* pMsg);
-    virtual void GetCustomTextColors(INT_PTR nItem, int iSubItem, COLORREF& clrText, COLORREF& clrTextBk);
+    virtual void GetCustomTextColors(INT_PTR nItem, int iSubItem, COLORREF& clrText, COLORREF& clrTextBk, bool& overrideSelectedBG);
     virtual void DoCustomPrePaint();
     virtual void GetCustomGridColors(int nItem, COLORREF& horzGridColor, COLORREF& vertGridColor);
 

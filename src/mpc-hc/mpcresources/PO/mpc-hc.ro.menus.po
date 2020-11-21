@@ -2,15 +2,16 @@
 # Copyright (C) 2002 - 2017 see Authors.txt
 # This file is distributed under the same license as the MPC-HC package.
 # Translators:
-# Daniel <danny3@tutanota.com>, 2014-2016
-# lordkag <lord.kagula@gmail.com>, 2014-2015,2017
+# MPC HC <adiposegithub@gmail.com>, 2020
+# Daniel <danny3@tutanota.com>, 2020
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: MPC-HC\n"
-"POT-Creation-Date: 2016-01-17 21:31:34+0000\n"
-"PO-Revision-Date: 2017-08-13 20:49+0000\n"
-"Last-Translator: kasper93\n"
-"Language-Team: Romanian (http://www.transifex.com/mpc-hc/mpc-hc/language/ro/)\n"
+"POT-Creation-Date: 2020-08-09 19:14:33+0000\n"
+"PO-Revision-Date: 2020-01-02 07:46+0000\n"
+"Last-Translator: Daniel <danny3@tutanota.com>, 2020\n"
+"Language-Team: Romanian (https://www.transifex.com/mpchc/teams/106126/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -89,6 +90,10 @@ msgctxt "ID_FILE_PROPERTIES"
 msgid "P&roperties"
 msgstr "Pr&oprietăți"
 
+msgctxt "ID_FILE_OPEN_LOCATION"
+msgid "Open File &Location"
+msgstr ""
+
 msgctxt "ID_FILE_EXIT"
 msgid "E&xit"
 msgstr "Î&nchide programul"
@@ -143,7 +148,7 @@ msgstr "&Depanare nuanțatoare"
 
 msgctxt "ID_VIEW_MPCTHEME"
 msgid "Dark Theme (restart)"
-msgstr ""
+msgstr "Temă întunecată (repornește)"
 
 msgctxt "POPUP"
 msgid "&Presets..."
@@ -168,6 +173,10 @@ msgstr "Ecran comp&let"
 msgctxt "POPUP"
 msgid "&Zoom"
 msgstr "&Scalare"
+
+msgctxt "ID_VIEW_ZOOM_25"
+msgid "&25%"
+msgstr ""
 
 msgctxt "ID_VIEW_ZOOM_50"
 msgid "&50%"
@@ -493,6 +502,22 @@ msgctxt "ID_PANSCAN_CENTER"
 msgid "Cen&ter"
 msgstr "Cen&trare"
 
+msgctxt "ID_PANSCAN_ROTATEZM"
+msgid "Rotate Cloc&kwise"
+msgstr ""
+
+msgctxt "ID_PANSCAN_ROTATEZ270"
+msgid "Rotate Counter-Clock&wise"
+msgstr ""
+
+msgctxt "ID_PANSCAN_ROTATEXM"
+msgid "&Flip Vertically"
+msgstr ""
+
+msgctxt "ID_PANSCAN_ROTATEYM"
+msgid "&Mirror"
+msgstr ""
+
 msgctxt "ID_VIEW_RESET"
 msgid "Re&set"
 msgstr "Re&stabilește"
@@ -552,6 +577,82 @@ msgstr "&Fișierul"
 msgctxt "ID_PLAY_REPEAT_WHOLEPLAYLIST"
 msgid "&Playlist"
 msgstr "&Lista de redare"
+
+msgctxt "ID_PLAY_REPEAT_AB"
+msgid "A-B (&Reset)"
+msgstr ""
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_A"
+msgid "A-B (Mark &A)"
+msgstr ""
+
+msgctxt "ID_PLAY_REPEAT_AB_MARK_B"
+msgid "A-B (Mark &B)"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "&Playback Rate"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.25 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.50 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.75 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "0.90 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.10 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.25 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "1.50 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "2.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "3.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "4.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "6.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "8.00 x"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "24 fps"
+msgstr ""
+
+msgctxt "POPUP"
+msgid "25 fps"
+msgstr ""
 
 msgctxt "ID_PLAY_DECRATE"
 msgid "&Decrease Rate"
@@ -712,4 +813,3 @@ msgstr "&Donare"
 msgctxt "ID_HELP_ABOUT"
 msgid "&About..."
 msgstr "&Despre..."
-
